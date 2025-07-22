@@ -19,8 +19,15 @@ def extract_player_info(root):
         civ = p['LEADER_NAME']['data']
         team = int(p['TEAM_ID']['data']) if 'TEAM_ID' in p else 0
         steam_id = p['USER_ID']['data'].split('@')[-1] if 'USER_ID' in p else -1
+        user_name = p['USER_ID']['data'].split('@')[0] if 'USER_ID' in p else ''
         player_alive = bool(p['PLAYER_ALIVE']['data'])
-        players.append({"steam_id": steam_id, "civ": civ, "team": team, "player_alive": player_alive})
+        players.append({
+            "steam_id": steam_id,
+            "user_name": user_name,
+            "civ": civ,
+            "team": team,
+            "player_alive": player_alive
+        })
     return players
 
 def extract_turn(root):
