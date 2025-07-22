@@ -257,6 +257,9 @@ def extract_player_info(root):
 def extract_turn(root):
     return int(root['turn']['value'])
 
+def extract_game_age(root):
+    return root['age']['value']
+
 def extract_map_type(root):
     map_type_with_loc = root['map']['value']
     parsed = json.loads(map_type_with_loc)
@@ -272,11 +275,13 @@ def parse_civ7_save(file_bytes: bytes, version: str):
 
     players = extract_player_info(root)
     turn = extract_turn(root)
+    age = extract_game_age(root)
     map_type = extract_map_type(root)
     game_mode = determine_game_mode(players)
 
     return {
         "game": "civ7",
+        "age": age,
         "turn": turn,
         "players": players,
         "game_mode": game_mode,
