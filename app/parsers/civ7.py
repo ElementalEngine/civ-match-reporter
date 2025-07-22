@@ -17,6 +17,7 @@ GAME_DATA_MARKERS = {
     "CIV_NAME": bytes([0x76, 0x97, 0x40, 0xde]),
     "USER_ID": bytes([0x20, 0x61, 0xF1, 0x26]),
     "MAP_TYPE": bytes([0x27, 0x60, 0x4C, 0x58]),
+    "TEAM_ID": bytes([0xd4, 0x5f, 0x83, 0x28]),
 }
 
 class ChunkType:
@@ -51,11 +52,13 @@ def parse_chunks(data: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
             leader = next((y for y in x['value'] if y['marker'] == GAME_DATA_MARKERS["LEADER_NAME"] and y['value']), None)
             civ = next((y for y in x['value'] if y['marker'] == GAME_DATA_MARKERS["CIV_NAME"] and y['value']), None)
             user_id = next((y for y in x['value'] if y['marker'] == GAME_DATA_MARKERS["USER_ID"] and y['value']), None)
+            team_id = next((y for y in x['value'] if y['marker'] == GAME_DATA_MARKERS["TEAM_ID"] and y['value']), None)
             if leader and civ:
                 players.append({
                     "leader": leader,
                     "civ": civ,
-                    "user_id": user_id
+                    "user_id": user_id,
+                    "team_id": team_id
                 })
 
     return {
@@ -240,9 +243,9 @@ def extract_player_info(root):
     for p in root['players']:
         civ = p['civ']['value']
         leader = p['leader']['value']
-        team = int(p['TEAM_ID']['value']) if 'TEAM_ID' in p else -1
-        steam_id = p['user_id']['value'].split('@')[-1] if 'user_id' in p else -1
-        user_name = p['user_id']['value'].split('@')[0] if 'user_id' in p else ''
+        team = int(p['team_id']['value']) if p['team_id'] != None else -1
+        steam_id = p['user_id']['value'].split('@')[-1] if p['user_id'] != None else -1
+        user_name = p['user_id']['value'].split('@')[0] if p['user_id'] != None else ''
         # player_alive = bool(p['PLAYER_ALIVE']['data'])
         players.append({
             "steam_id": steam_id,
