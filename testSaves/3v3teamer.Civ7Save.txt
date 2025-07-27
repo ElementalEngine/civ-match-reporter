@@ -1,0 +1,52 @@
+Parsed data: {
+    "game": "civ7",
+    "age": "AGE_ANTIQUITY",
+    "turn": 45,
+    "players": [
+        {
+            "steam_id": "76561198052505244",
+            "user_name": "Eudaimania",
+            "civ": "CIVILIZATION_HAN",
+            "leader": "LEADER_CATHERINE",
+            "team": 0
+        },
+        {
+            "steam_id": "76561198106112789",
+            "user_name": "sebastian",
+            "civ": "CIVILIZATION_GREECE",
+            "leader": "LEADER_TECUMSEH",
+            "team": 0
+        },
+        {
+            "steam_id": "76561199700824480",
+            "user_name": "Turcly",
+            "civ": "CIVILIZATION_KHMER",
+            "leader": "LEADER_LAFAYETTE",
+            "team": 0
+        },
+        {
+            "steam_id": "76561198030752900",
+            "user_name": "Kovas",
+            "civ": "CIVILIZATION_MAYA",
+            "leader": "LEADER_BENJAMIN_FRANKLIN",
+            "team": 5
+        },
+        {
+            "steam_id": "76561198043972484",
+            "user_name": "sebastian",
+            "civ": "CIVILIZATION_MISSISSIPPIAN",
+            "leader": "LEADER_JOSE_RIZAL",
+            "team": 5
+        },
+        {
+            "steam_id": "76561198046790489",
+            "user_name": "Arjou",
+            "civ": "CIVILIZATION_PERSIA",
+            "leader": "LEADER_AMINA",
+            "team": 5
+        }
+    ],
+    "game_mode": "team",
+    "map_type": "Pangaea Plus",
+    "parser_version": "1.0.0"
+}

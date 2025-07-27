@@ -17,7 +17,7 @@ GAME_DATA_MARKERS = {
     "CIV_NAME": bytes([0x76, 0x97, 0x40, 0xde]),
     "USER_ID": bytes([0x20, 0x61, 0xF1, 0x26]),
     "MAP_TYPE": bytes([0x27, 0x60, 0x4C, 0x58]),
-    "TEAM_ID": bytes([0xd4, 0x5f, 0x83, 0x28]),
+    "TEAM_ID": bytes([0xDE, 0xF6, 0x2D, 0x9B]),
 }
 
 class ChunkType:
@@ -60,6 +60,8 @@ def parse_chunks(data: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
                     "user_id": user_id,
                     "team_id": team_id
                 })
+    players.sort(key=lambda x: 0 if x["team_id"] is None else x["team_id"]["value"])
+    # sorted_players = sorted(players, key=lambda x: x["team_id"])
 
     return {
         "turn": find_marker(data['group1'], GAME_DATA_MARKERS["GAME_TURN"]),
@@ -243,7 +245,7 @@ def extract_player_info(root):
     for p in root['players']:
         civ = p['civ']['value']
         leader = p['leader']['value']
-        team = int(p['team_id']['value']) if p['team_id'] != None else -1
+        team = int(p['team_id']['value']) if p['team_id'] != None else 0
         steam_id = p['user_id']['value'].split('@')[-1] if p['user_id'] != None else -1
         user_name = p['user_id']['value'].split('@')[0] if p['user_id'] != None else ''
         # player_alive = bool(p['PLAYER_ALIVE']['data'])
@@ -304,7 +306,7 @@ def main():
     with open(args.filename, "rb") as f:
         buffer = f.read()
         result = parse_civ7_save(buffer, "1.0.0")
-        print("Parsed data:", result)
+        print("Parsed data:", json.dumps(result, indent=4))
 
 if __name__ == "__main__":
     main()

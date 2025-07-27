@@ -1,0 +1,66 @@
+Parsed data: {
+    "game": "civ7",
+    "age": "AGE_EXPLORATION",
+    "turn": 27,
+    "players": [
+        {
+            "steam_id": "76561198046790489",
+            "user_name": "Arjou",
+            "civ": "CIVILIZATION_CHOLA",
+            "leader": "LEADER_HARRIET_TUBMAN",
+            "team": 0
+        },
+        {
+            "steam_id": "76561198048275863",
+            "user_name": "Roven",
+            "civ": "CIVILIZATION_SHAWNEE",
+            "leader": "LEADER_BENJAMIN_FRANKLIN",
+            "team": 1
+        },
+        {
+            "steam_id": "76561198022995349",
+            "user_name": "Jacooob",
+            "civ": "CIVILIZATION_MAJAPAHIT",
+            "leader": "LEADER_HIMIKO_ALT",
+            "team": 2
+        },
+        {
+            "steam_id": "76561198832118343",
+            "user_name": "Llauriel",
+            "civ": "CIVILIZATION_MING",
+            "leader": "LEADER_CONFUCIUS",
+            "team": 3
+        },
+        {
+            "steam_id": "76561199700824480",
+            "user_name": "Turcly",
+            "civ": "CIVILIZATION_BULGARIA",
+            "leader": "LEADER_JOSE_RIZAL",
+            "team": 4
+        },
+        {
+            "steam_id": "76561198030805098",
+            "user_name": "Nepster",
+            "civ": "CIVILIZATION_SPAIN",
+            "leader": "LEADER_LAFAYETTE",
+            "team": 5
+        },
+        {
+            "steam_id": "76561198021954438",
+            "user_name": "-KC- CanuckSoldier[CPL]",
+            "civ": "CIVILIZATION_ABBASID",
+            "leader": "LEADER_HATSHEPSUT",
+            "team": 6
+        },
+        {
+            "steam_id": "76561198101941364",
+            "user_name": "Civil",
+            "civ": "CIVILIZATION_SONGHAI",
+            "leader": "LEADER_XERXES_ALT",
+            "team": 7
+        }
+    ],
+    "game_mode": "ffa",
+    "map_type": "Pangaea Plus",
+    "parser_version": "1.0.0"
+}

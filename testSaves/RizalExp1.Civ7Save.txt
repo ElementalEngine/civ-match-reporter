@@ -1,1 +1,52 @@
-Parsed data: {'game': 'civ7', 'age': 'AGE_EXPLORATION', 'turn': 1, 'players': [{'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_SONGHAI', 'leader': 'LEADER_HARRIET_TUBMAN', 'team': 1}, {'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_SHAWNEE', 'leader': 'LEADER_TECUMSEH', 'team': 1}, {'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_SPAIN', 'leader': 'LEADER_FRIEDRICH_ALT', 'team': 1}, {'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_MAJAPAHIT', 'leader': 'LEADER_HIMIKO_ALT', 'team': 1}, {'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_NORMAN', 'leader': 'LEADER_LAFAYETTE', 'team': 1}, {'steam_id': -1, 'user_name': '', 'civ': 'CIVILIZATION_MING', 'leader': 'LEADER_JOSE_RIZAL', 'team': 3}], 'game_mode': 'team', 'map_type': 'Continents Plus', 'parser_version': '1.0.0'}
+Parsed data: {
+    "game": "civ7",
+    "age": "AGE_EXPLORATION",
+    "turn": 1,
+    "players": [
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_MING",
+            "leader": "LEADER_JOSE_RIZAL",
+            "team": 0
+        },
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_SPAIN",
+            "leader": "LEADER_FRIEDRICH_ALT",
+            "team": 1
+        },
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_SONGHAI",
+            "leader": "LEADER_HARRIET_TUBMAN",
+            "team": 2
+        },
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_SHAWNEE",
+            "leader": "LEADER_TECUMSEH",
+            "team": 3
+        },
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_NORMAN",
+            "leader": "LEADER_LAFAYETTE",
+            "team": 4
+        },
+        {
+            "steam_id": -1,
+            "user_name": "",
+            "civ": "CIVILIZATION_MAJAPAHIT",
+            "leader": "LEADER_HIMIKO_ALT",
+            "team": 5
+        }
+    ],
+    "game_mode": "ffa",
+    "map_type": "Continents Plus",
+    "parser_version": "1.0.0"
+}
