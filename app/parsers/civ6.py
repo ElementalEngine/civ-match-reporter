@@ -3,6 +3,7 @@ from xml.etree import ElementTree
 import struct
 import argparse
 from app.config import CIV_SAVE_PARSER_VERSION
+import json
 
 def determine_game_mode(players):
     teams = [p['team'] for p in players]
@@ -413,4 +414,4 @@ if __name__ == "__main__":
         with open(args.filename, 'rb') as f:
             buffer = f.read()
         result = parse_civ6_save(buffer)
-        print(result)
+        print(json.dumps(result, indent=4))
