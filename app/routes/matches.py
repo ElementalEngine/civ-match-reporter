@@ -1,47 +1,35 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException
-from bson import ObjectId
 from app.dependencies import get_database
 from app.models.schemas import MatchResponse, MatchUpdate
+from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/matches", tags=["matches"])
 
 @router.get("/{match_id}", response_model=MatchResponse)
-async def get_match(match_id: str, db=Depends(get_database)):
+async def get_match(match_id: str, db = Depends(get_database)):
+    svc = MatchService(db)
     try:
-        oid = ObjectId(match_id)
-    except Exception:
+        return await svc.get(match_id)
+    except InvalidIDError:
         logger.error(f"🔴 Invalid match ID: {match_id}")
         raise HTTPException(status_code=400, detail="Invalid match ID")
-
-    doc = await db.pending_matches.find_one({"_id": oid})
-    if not doc:
+    except NotFoundError:
         logger.warning(f"🔴 Match not found: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
-
-    doc["_id"] = str(doc["_id"])
-    return doc
 
 @router.put("/{match_id}", response_model=MatchResponse)
-async def update_match(match_id: str, payload: MatchUpdate, db=Depends(get_database)):
+async def update_match(match_id: str, payload: MatchUpdate, db = Depends(get_database)):
+    svc = MatchService(db)
     try:
-        oid = ObjectId(match_id)
-    except Exception:
+        return await svc.update(match_id, payload.dict(exclude_unset=True))
+    except InvalidIDError:
         logger.error(f"🔴 Invalid match ID: {match_id}")
         raise HTTPException(status_code=400, detail="Invalid match ID")
-
-    update_data = payload.dict(exclude_unset=True)
-    if not update_data:
-        logger.warning("⚠️ Empty update payload")
-        raise HTTPException(status_code=400, detail="Empty update payload")
-
-    res = await db.pending_matches.update_one({"_id": oid}, {"$set": update_data})
-    if res.matched_count == 0:
+    except NotFoundError:
         logger.warning(f"🔴 Match not found: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
-
-    doc = await db.pending_matches.find_one({"_id": oid})
-    doc["_id"] = str(doc["_id"])
-    logger.info(f"✅ Updated match {match_id}")
-    return doc
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
