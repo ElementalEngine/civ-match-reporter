@@ -1,18 +1,16 @@
 import logging
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict
 from bson import ObjectId
-from app.parsers import parse_civ7_save, parse_civ6_save
+from app.parsers import parse_civ7_save, parse_civ6_save  # do not modify parser code
+from app.config import settings
 from app.models.db_models import MatchModel
 
 logger = logging.getLogger(__name__)
-
 
 class MatchServiceError(Exception): ...
 class InvalidIDError(MatchServiceError): ...
 class ParseError(MatchServiceError): ...
 class NotFoundError(MatchServiceError): ...
-
 
 class MatchService:
     def __init__(self, db):
@@ -28,31 +26,27 @@ class MatchService:
 
     @staticmethod
     def _parse_save(file_bytes: bytes) -> Dict[str, Any]:
-        for parser, tag in ((parse_civ7_save, "Civ7"), (parse_civ6_save, "Civ6")):
+        for parser in (parse_civ7_save, parse_civ6_save):
             try:
-                data = parser(file_bytes)
-                data["game"] = tag
-                logger.info(f"✅ 🔍 Parsed as {tag}")
+                data = parser(file_bytes, settings.civ_save_parser_version)
+                logger.info(f"✅ 🔍 Parsed as {data.get('game')}")
                 return data
             except Exception as e:
-                logger.warning(f"⚠️ Parse attempt failed for {tag}: {e}")
+                logger.warning(f"⚠️ Parse attempt failed: {e}")
         raise ParseError("Unrecognized save file format")
 
     async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         match = MatchModel(**parsed)
         res = await self.col.insert_one(match.dict())
-        out = {"match_id": str(res.inserted_id), **match.dict()}
-        logger.info(f"✅ Stored match {out['match_id']}")
-        return out
+        return {"match_id": str(res.inserted_id), **match.dict()}
 
     async def get(self, match_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         doc = await self.col.find_one({"_id": oid})
         if not doc:
             raise NotFoundError("Match not found")
-        doc["_id"] = str(doc["_id"])
-        doc["match_id"] = doc.pop("_id")
+        doc["match_id"] = str(doc.pop("_id"))
         return doc
 
     async def update(self, match_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -63,7 +57,6 @@ class MatchService:
         if res.matched_count == 0:
             raise NotFoundError("Match not found")
         updated = await self.col.find_one({"_id": oid})
-        updated["_id"] = str(updated["_id"])
-        updated["match_id"] = updated.pop("_id")
+        updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Updated match {match_id}")
         return updated
