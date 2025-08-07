@@ -1,16 +1,8 @@
 from typing import List
 from pydantic import BaseSettings, Field, AnyHttpUrl, SecretStr, validator, root_validator, conint
-
+# Emoji Key: ✅ success | ⚠️ warning | 🔴 error | 🟢 healthy | 🟠 shutdown | 🔑 DI | 🏓 health | 🔍 parse
 class Settings(BaseSettings):
-# Emoji Key:
-#   ✅ Success/completion of an operation
-#   ⚠️ Warning or non-fatal error during parsing
-#   🔴 Fatal error or invalid input
-#   🟢 Startup or healthy status
-#   🟠 Teardown or shutdown status
-
     civ_save_parser_version: str = Field(..., env="CIV_SAVE_PARSER_VERSION")
-
     mongodb_uri: SecretStr = Field(..., env="MONGO_URI")
     mongodb_db_name: str = Field("match_reporter", env="MONGO_DB")
     mongodb_timeout_ms: conint(ge=1000, le=30000) = Field(5000, env="MONGODB_TIMEOUT_MS")
@@ -20,9 +12,7 @@ class Settings(BaseSettings):
     api_host: str = Field("0.0.0.0", env="API_HOST")
     api_port: conint(gt=0, lt=65536) = Field(8000, env="API_PORT")
 
-    allowed_origins: List[AnyHttpUrl] = Field(
-        ["http://localhost:3000"], env="ALLOWED_ORIGINS"
-    )
+    allowed_origins: List[AnyHttpUrl] = Field(["http://localhost:3000"], env="ALLOWED_ORIGINS")
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -36,7 +26,7 @@ class Settings(BaseSettings):
 
     @root_validator
     def _ensure_mongo_uri_scheme(cls, values):
-        uri = values.get("mongodb_uri") 
+        uri = values.get("mongodb_uri")
         if uri and not uri.get_secret_value().startswith(("mongodb://", "mongodb+srv://")):
             raise ValueError("MONGO_URI must start with 'mongodb://' or 'mongodb+srv://'")
         return values

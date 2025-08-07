@@ -1,7 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-
 
 class PlayerSchema(BaseModel):
     steam_id: str
@@ -13,9 +12,8 @@ class PlayerSchema(BaseModel):
     discord_id: Optional[str] = None
     placement: Optional[int] = None
 
-
 class MatchResponse(BaseModel):
-    match_id: str = Field(..., alias="_id")
+    match_id: str
     game: str
     turn: int
     age: Optional[int] = None
@@ -26,12 +24,7 @@ class MatchResponse(BaseModel):
     created_at: datetime
     confirmed: bool
     flagged: bool
-    flagged_by: Optional[str]
-
-    class Config:
-        allow_population_by_field_name = True
-        json_encoders = {datetime: lambda v: v.isoformat()}
-
+    flagged_by: Optional[str] = None
 
 class MatchUpdate(BaseModel):
     players: Optional[List[PlayerSchema]] = None

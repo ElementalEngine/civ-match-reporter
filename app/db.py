@@ -1,9 +1,7 @@
 import logging
 from typing import Optional
-
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
-
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -18,7 +16,6 @@ def init_db(app: FastAPI) -> None:
                 maxPoolSize=settings.mongodb_max_pool_size,
                 minPoolSize=settings.mongodb_min_pool_size,
             )
-            # Force connection test
             await app.state.mongodb_client.server_info()
             app.state.mongodb = app.state.mongodb_client[settings.mongodb_db_name]
             logger.info("🟢 MongoDB connected")
