@@ -1,27 +1,44 @@
-import os
-from dotenv import load_dotenv
-from pathlib import Path
+from typing import List
+from pydantic import BaseSettings, Field, AnyHttpUrl, SecretStr, validator, root_validator, conint
 
-# Load from .env (project root)
-env_path = Path(__file__).resolve().parents[1] / '.env'
-load_dotenv(dotenv_path=env_path)
+class Settings(BaseSettings):
+# Emoji Key:
+#   ✅ Success/completion of an operation
+#   ⚠️ Warning or non-fatal error during parsing
+#   🔴 Fatal error or invalid input
+#   🟢 Startup or healthy status
+#   🟠 Teardown or shutdown status
 
-def require_env(key: str) -> str:
-    value = os.getenv(key)
-    if not value:
-        raise RuntimeError(f"Required environment variable '{key}' is not set.")
-    return value
+    civ_save_parser_version: str = Field(..., env="CIV_SAVE_PARSER_VERSION")
 
-# Required: no defaults for secrets
-CIV_SAVE_PARSER_VERSION = os.getenv("CIV_SAVE_PARSER_VERSION", "dev")
+    mongodb_uri: SecretStr = Field(..., env="MONGO_URI")
+    mongodb_db_name: str = Field("match_reporter", env="MONGO_DB")
+    mongodb_timeout_ms: conint(ge=1000, le=30000) = Field(5000, env="MONGODB_TIMEOUT_MS")
+    mongodb_max_pool_size: conint(ge=1, le=500) = Field(100, env="MONGODB_MAX_POOL_SIZE")
+    mongodb_min_pool_size: conint(ge=0, le=100) = Field(0, env="MONGODB_MIN_POOL_SIZE")
 
-# Required: fail fast if not set
-MONGO_URI = require_env("MONGO_URI")
-MONGO_DB = os.getenv("MONGO_DB", "match_reporter")
+    api_host: str = Field("0.0.0.0", env="API_HOST")
+    api_port: conint(gt=0, lt=65536) = Field(8000, env="API_PORT")
 
-# Optional: use defaults for local dev
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", "8000"))
+    allowed_origins: List[AnyHttpUrl] = Field(
+        ["http://localhost:3000"], env="ALLOWED_ORIGINS"
+    )
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = False
 
-# Safe default: only allow local by default
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    @validator("allowed_origins", pre=True)
+    def _split_origins(cls, v):
+        if isinstance(v, str):
+            return [u.strip() for u in v.split(",") if u.strip()]
+        return v
+
+    @root_validator
+    def _ensure_mongo_uri_scheme(cls, values):
+        uri = values.get("mongodb_uri") 
+        if uri and not uri.get_secret_value().startswith(("mongodb://", "mongodb+srv://")):
+            raise ValueError("MONGO_URI must start with 'mongodb://' or 'mongodb+srv://'")
+        return values
+
+settings = Settings()
