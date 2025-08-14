@@ -2,4 +2,5 @@ fastapi>=0.112.0
 uvicorn[standard]>=0.30.0
 motor>=3.4.0
 pydantic==1.10.15
-python-multipart>=0.0.9 
+python-multipart>=0.0.9
+trueskill==0.4.5 
