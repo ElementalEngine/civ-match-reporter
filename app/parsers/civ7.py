@@ -275,7 +275,7 @@ def extract_map_type(root):
                 break
     return map_type
 
-def parse_civ7_save(file_bytes: bytes, version: str):
+def parse_civ7_save(file_bytes: bytes, version: str = '1.1'):
     root = parse(file_bytes)
 
     players = extract_player_info(root)
