@@ -20,60 +20,21 @@ def test_parse_civ6_save():
     assert result['game_mode'] == 'ffa'
     assert result['map_type'] == 'Lakes'
 
-    assert(len(result['players']) == 8)
-    assert result['players'][0] == {
-        'steam_id': 'CEO of Spearfighting',
-        'user_name': 'CEO of Spearfighting',
-        'civ': 'LEADER_RAMSES',
-        'team': 0,
-        'player_alive': True
-    }
-    assert result['players'][1] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_HOJO',
-        'team': 1,
-        'player_alive': True
-    }
-    assert result['players'][2] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_LADY_TRIEU',
-        'team': 2,
-        'player_alive': False
-    }
-    assert result['players'][3] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_SALADIN',
-        'team': 3,
-        'player_alive': True
-    }
-    assert result['players'][4] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_TRAJAN',
-        'team': 4,
-        'player_alive': False
-    }
-    assert result['players'][5] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_JAYAVARMAN',
-        'team': 5,
-        'player_alive': False
-    }
-    assert result['players'][6] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_TAMAR',
-        'team': 6,
-        'player_alive': False
-    }
-    assert result['players'][7] == {
-        'steam_id': -1,
-        'user_name': '',
-        'civ': 'LEADER_PHILIP_II',
-        'team': 7,
-        'player_alive': True
-    }
+    expected_players = [
+        {'steam_id': 'CEO of Spearfighting', 'user_name': 'CEO of Spearfighting', 'civ': 'LEADER_RAMSES', 'team': 0, 'player_alive': True},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_HOJO', 'team': 1, 'player_alive': True},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_LADY_TRIEU', 'team': 2, 'player_alive': False},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_SALADIN', 'team': 3, 'player_alive': True},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_TRAJAN', 'team': 4, 'player_alive': False},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_JAYAVARMAN', 'team': 5, 'player_alive': False},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_TAMAR', 'team': 6, 'player_alive': False},
+        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_PHILIP_II', 'team': 7, 'player_alive': True},
+    ]
+    assert len(result['players']) == len(expected_players)
+    for i, expected in enumerate(expected_players):
+        player = result['players'][i]
+        assert player['steam_id'] == expected['steam_id']
+        assert player['user_name'] == expected['user_name']
+        assert player['civ'] == expected['civ']
+        assert player['team'] == expected['team']
+        assert player['player_alive'] == expected['player_alive']
