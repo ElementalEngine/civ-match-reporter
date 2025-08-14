@@ -1,6 +1,6 @@
 from typing import List
+from pydantic_settings import BaseSettings
 from pydantic import (
-    BaseSettings,
     Field,
     AnyHttpUrl,
     SecretStr,
@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     reporting_backend_version: str = Field(..., env="REPORTING_BACKEND_VERSION")
 
     # MongoDB
-    mongodb_uri: SecretStr = Field(..., env="MONGO_URI")
-    mongodb_db_name: str = Field("match_reporter", env="MONGO_DB")
+    mongodb_uri: SecretStr = Field(..., env="MONGODB_URI")
+    mongodb_db_name: str = Field("match_reporter", env="MONGO_DB_NAME")
     mongodb_timeout_ms: conint(ge=1000, le=30000) = Field(5000, env="MONGODB_TIMEOUT_MS")
     mongodb_max_pool_size: conint(ge=1, le=500) = Field(100, env="MONGODB_MAX_POOL_SIZE")
     mongodb_min_pool_size: conint(ge=0, le=100) = Field(0, env="MONGODB_MIN_POOL_SIZE")
@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     # Skill Display Parameters
     ts_sigma_free: confloat(ge=0) = Field(90.0, env="TS_SIGMA_FREE")
     ts_teamer_boost: float = Field(1.0, env="TS_TEAMER_BOOST")
+    
+    civ_save_parser_version: str = Field("0.1", env="CIV_SAVE_PARSER_VERSION")
 
     class Config:
         env_file = ".env"
@@ -52,14 +54,14 @@ class Settings(BaseSettings):
             return [u.strip() for u in v.split(",") if u.strip()]
         return v
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def _ensure_mongo_uri_scheme(cls, values):
         uri = values.get("mongodb_uri")
         if uri and not uri.get_secret_value().startswith(("mongodb://", "mongodb+srv://")):
             raise ValueError("MONGO_URI must start with 'mongodb://' or 'mongodb+srv://'")
         return values
 
-    @root_validator
+    @root_validator(skip_on_failure=True)
     def _validate_ts_consistency(cls, values):
         mu = values.get("ts_mu")
         sigma = values.get("ts_sigma")

@@ -2,7 +2,7 @@ import zlib
 from xml.etree import ElementTree
 import struct
 import argparse
-from app.config import CIV_SAVE_PARSER_VERSION
+from app.config import settings
 import json
 
 def determine_game_mode(players):
