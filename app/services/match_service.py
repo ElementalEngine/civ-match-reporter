@@ -16,6 +16,7 @@ class MatchService:
     def __init__(self, db):
         self.db = db
         self.col = db.pending_matches
+        self.players = db.players
 
     @staticmethod
     def _to_oid(match_id: str) -> ObjectId:
@@ -26,18 +27,31 @@ class MatchService:
 
     @staticmethod
     def _parse_save(file_bytes: bytes) -> Dict[str, Any]:
-        for parser in (parse_civ7_save, parse_civ6_save):
-            try:
-                data = parser(file_bytes, settings.civ_save_parser_version)
-                logger.info(f"✅ 🔍 Parsed as {data.get('game')}")
-                return data
-            except Exception as e:
-                logger.warning(f"⚠️ Parse attempt failed: {e}")
-        raise ParseError("Unrecognized save file format")
+        if file_bytes.startswith(b'CIV6'):
+            parser = parse_civ6_save
+        elif file_bytes.startswith(b'CIV7'):
+            parser = parse_civ7_save
+        else:
+            raise ParseError("Unrecognized save file format")
+        try:
+            data = parser(file_bytes, settings.civ_save_parser_version)
+            logger.info(f"✅ 🔍 Parsed as {data.get('game')}")
+            return data
+        except Exception as e:
+            raise ParseError(f"⚠️ Parse attempt failed: {e}")
+        
+    async def match_steam_id_to_discord(self, match):
+        for player in match.players:
+            if player.steam_id and player.steam_id != '-1':
+                discord_id = await self.players.find_one({"steam_id": player.steam_id})
+                if discord_id:
+                    player.discord_id = discord_id.get("discord_id")
+        return match
 
     async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         match = MatchModel(**parsed)
+        match = self.match_steam_id_to_discord(match)
         res = await self.col.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
 

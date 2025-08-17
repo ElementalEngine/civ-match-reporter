@@ -2,9 +2,9 @@ import os
 import pytest
 from app.parsers import civ7
 
-def test_parse_civ6_save():
-    # Path to a test Civ6 save file
-    test_save_path = os.path.join(os.path.dirname(__file__), '../data/testSaves/3v3_T10.Civ7Save')
+def test_parse_civ7_save():
+    # Path to a test Civ7 save file
+    test_save_path = os.path.join(os.path.dirname(__file__), '../data/civ7TestSaves/3v3_T10.Civ7Save')
     assert os.path.exists(test_save_path), f"Save file not found: {test_save_path}"
 
     with open(test_save_path, 'rb') as f:
