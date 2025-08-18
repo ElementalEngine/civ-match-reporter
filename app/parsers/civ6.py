@@ -199,7 +199,7 @@ def read_string(buffer, state):
         return 'Error reading string: ' + str(orig_state)
     if str_info[1] == 0 or str_info[1] == 0x20:
         state['pos'] += 10
-        result = "Don't know what this kind of string is..."
+        result = ""
     elif str_info[1] == 0x21:
         state['pos'] += 6
         null_term = buffer.find(b'\x00', state['pos']) - state['pos']
