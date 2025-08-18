@@ -76,3 +76,13 @@ civ6_leaders_dict['LEADER_GILGAMESH'] = 'SumeriaGilgamesh'
 civ6_leaders_dict['LEADER_KRISTINA'] = 'SwedenKristina'
 civ6_leaders_dict['LEADER_LADY_TRIEU'] = 'VietnamBaTrieu'
 civ6_leaders_dict['LEADER_SHAKA'] = 'ZuluShaka'
+
+# BBG Expanded Civs
+civ6_leaders_dict['LEADER_LIME_THULE_DAVE'] = 'Kiviuq'
+civ6_leaders_dict['LEADER_JFD_OLYMPIAS'] = 'Olympias'
+civ6_leaders_dict['LEADER_LIME_TEO_OWL'] = 'Spearthrower'
+civ6_leaders_dict['LEADER_LL_TEKINICH_II'] = 'TeKinich'
+civ6_leaders_dict['LEADER_LIME_PHOE_AHIRAM'] = 'Ahiram'
+civ6_leaders_dict['LEADER_SUK_VERCINGETORIX_DLC'] = 'Vercingetorix'
+civ6_leaders_dict['LEADER_SUK_TRISONG_DETSEN'] = 'Trisong'
+civ6_leaders_dict['LEADER_SUK_AL_HASAN'] = 'AlHasan'
