@@ -32,7 +32,7 @@ class MatchService:
         elif file_bytes.startswith(b'CIV7'):
             parser = parse_civ7_save
         else:
-            raise ParseError("Unrecognized save file format")
+            raise ParseError(f"Unrecognized save file format. starts with {file_bytes[:4]!r}")
         try:
             data = parser(file_bytes, settings.civ_save_parser_version)
             logger.info(f"✅ 🔍 Parsed as {data.get('game')}")
@@ -51,7 +51,7 @@ class MatchService:
     async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         match = MatchModel(**parsed)
-        match = self.match_steam_id_to_discord(match)
+        match = await self.match_steam_id_to_discord(match)
         res = await self.col.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
 

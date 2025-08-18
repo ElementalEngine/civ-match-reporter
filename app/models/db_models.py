@@ -3,8 +3,8 @@ from typing import List, Optional
 from datetime import datetime
 
 class PlayerModel(BaseModel):
-    steam_id: str
-    user_name: str
+    steam_id: Optional[str] = None
+    user_name: Optional[str] = None
     civ: str
     team: int
     leader: Optional[str] = None

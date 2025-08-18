@@ -19,8 +19,8 @@ def extract_player_info(root):
     for p in root['parsed']['CIVS']:
         civ = p['LEADER_NAME']['data']
         team = int(p['TEAM_ID']['data']) if 'TEAM_ID' in p else 0
-        steam_id = p['USER_ID']['data'].split('@')[-1] if 'USER_ID' in p else -1
-        user_name = p['USER_ID']['data'].split('@')[0] if 'USER_ID' in p else ''
+        steam_id = p['USER_ID']['data'].split('@')[-1] if 'USER_ID' in p else None
+        user_name = p['USER_ID']['data'].split('@')[0] if 'USER_ID' in p else None
         player_alive = bool(p['PLAYER_ALIVE']['data'])
         players.append({
             "steam_id": steam_id,

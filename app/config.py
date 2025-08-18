@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     ts_sigma_free: float = Field(90.0, ge=0, env="TS_SIGMA_FREE")
     ts_teamer_boost: float = Field(1.0, env="TS_TEAMER_BOOST")
+    
+    civ_save_parser_version: str = Field("1.0", env="CIV_SAVE_PARSER_VERSION")
 
     # pydantic v2 model config
     model_config = {

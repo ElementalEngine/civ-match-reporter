@@ -8,9 +8,13 @@ from app.config import settings
 from app.db import db_lifespan
 from app.dependencies import get_database
 
+from app.routes import router
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Civ Save Tool", lifespan=db_lifespan)
+
+app.include_router(router)
 
 # CORS - use the validated allowed_origins property and convert to strings
 app.add_middleware(

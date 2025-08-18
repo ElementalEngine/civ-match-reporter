@@ -17,9 +17,9 @@ async def upload_game_report(
         created = await svc.create_from_save(raw)
         logger.info(f"✅ Stored match {created['match_id']}")
         return created
-    except ParseError:
+    except ParseError as e:
         logger.error("🔴 Unrecognized save file format")
-        raise HTTPException(status_code=400, detail="Unrecognized save file format")
+        raise HTTPException(status_code=400, detail=f"Unrecognized save file format {e}")
     except Exception as e:
         logger.exception(f"🔴 Failed to store match: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

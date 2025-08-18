@@ -3,8 +3,8 @@ from typing import List, Optional
 from datetime import datetime
 
 class PlayerSchema(BaseModel):
-    steam_id: str
-    user_name: str
+    steam_id: Optional[str] = None
+    user_name: Optional[str] = None
     civ: str
     team: int
     leader: Optional[str] = None
@@ -27,6 +27,7 @@ class MatchResponse(BaseModel):
     flagged_by: Optional[str] = None
 
 class MatchUpdate(BaseModel):
+    match_id: str
     players: Optional[List[PlayerSchema]] = None
     confirmed: Optional[bool] = None
     flagged: Optional[bool] = None
