@@ -24,3 +24,4 @@ class MatchModel(BaseModel):
     confirmed: bool = False
     flagged: bool = False
     flagged_by: Optional[str] = None
+    save_file_hash: str

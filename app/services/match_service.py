@@ -4,6 +4,7 @@ from bson import ObjectId
 from app.parsers import parse_civ7_save, parse_civ6_save  # do not modify parser code
 from app.config import settings
 from app.models.db_models import MatchModel
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class MatchService:
             return data
         except Exception as e:
             raise ParseError(f"⚠️ Parse attempt failed: {e}")
-        
+
     async def match_id_to_discord(self, match):
         for player in match.players:
             if player.steam_id and player.steam_id != '-1':
@@ -49,7 +50,19 @@ class MatchService:
         return match
 
     async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
+        m = hashlib.sha256()
+        m.update(file_bytes)
+        save_file_hash = m.hexdigest()
+        res = await self.col.find_one({"save_file_hash": save_file_hash})
+        if res:
+            match_id = str(res["_id"])
+            del res["_id"]
+            res["match_id"] = match_id
+            res['repeated'] = True
+            return res
         parsed = self._parse_save(file_bytes)
+        parsed['save_file_hash'] = save_file_hash
+        parsed['repeated'] = False
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
         res = await self.col.insert_one(match.dict())
