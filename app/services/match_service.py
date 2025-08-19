@@ -15,8 +15,8 @@ class NotFoundError(MatchServiceError): ...
 class MatchService:
     def __init__(self, db):
         self.db = db
-        self.col = db.pending_matches
-        self.players = db.players
+        self.col = db["civ_match_reporter"].pending_matches
+        self.players = db["players"].players
 
     @staticmethod
     def _to_oid(match_id: str) -> ObjectId:
@@ -43,7 +43,7 @@ class MatchService:
     async def match_steam_id_to_discord(self, match):
         for player in match.players:
             if player.steam_id and player.steam_id != '-1':
-                discord_id = await self.players.find_one({"steam_id": player.steam_id})
+                discord_id = await self.players.find_one({"steam_id": f"{player.steam_id}"})
                 if discord_id:
                     player.discord_id = discord_id.get("discord_id")
         return match

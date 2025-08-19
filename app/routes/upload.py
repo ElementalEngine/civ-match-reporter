@@ -4,7 +4,7 @@ from app.dependencies import get_database
 from app.services.match_service import MatchService, ParseError
 
 logger = logging.getLogger(__name__)
-router = APIRouter(tags=["upload"])
+router = APIRouter(prefix="/api/v1", tags=["upload"])
 
 @router.post("/upload-game-report/")
 async def upload_game_report(
