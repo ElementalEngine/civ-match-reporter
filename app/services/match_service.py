@@ -40,7 +40,7 @@ class MatchService:
         except Exception as e:
             raise ParseError(f"⚠️ Parse attempt failed: {e}")
         
-    async def match_steam_id_to_discord(self, match):
+    async def match_id_to_discord(self, match):
         for player in match.players:
             if player.steam_id and player.steam_id != '-1':
                 discord_id = await self.players.find_one({"steam_id": f"{player.steam_id}"})
@@ -51,7 +51,7 @@ class MatchService:
     async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         match = MatchModel(**parsed)
-        match = await self.match_steam_id_to_discord(match)
+        match = await self.match_id_to_discord(match)
         res = await self.col.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
 
