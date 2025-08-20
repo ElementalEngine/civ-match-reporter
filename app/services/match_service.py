@@ -49,7 +49,7 @@ class MatchService:
                     player.discord_id = discord_id.get("discord_id")
         return match
 
-    async def create_from_save(self, file_bytes: bytes) -> Dict[str, Any]:
+    async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str) -> Dict[str, Any]:
         m = hashlib.sha256()
         m.update(file_bytes)
         save_file_hash = m.hexdigest()
@@ -63,6 +63,7 @@ class MatchService:
         parsed = self._parse_save(file_bytes)
         parsed['save_file_hash'] = save_file_hash
         parsed['repeated'] = False
+        parsed['reporter_discord_id'] = reporter_discord_id
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
         res = await self.col.insert_one(match.dict())

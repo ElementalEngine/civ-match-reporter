@@ -25,3 +25,4 @@ class MatchModel(BaseModel):
     flagged: bool = False
     flagged_by: Optional[str] = None
     save_file_hash: str
+    reporter_discord_id: str

@@ -7,7 +7,7 @@ from app.services.match_service import MatchService, InvalidIDError, NotFoundErr
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["matches"])
 
-@router.get("/get-match/", response_model=MatchResponse)
+@router.put("/get-match/", response_model=MatchResponse)
 async def get_match(match_id: str = Form(), db = Depends(get_database)):
     svc = MatchService(db)
     try:

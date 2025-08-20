@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
+from fastapi import APIRouter, File, Form, UploadFile, Depends, HTTPException
 from app.dependencies import get_database
 from app.services.match_service import MatchService, ParseError
 
@@ -9,12 +9,13 @@ router = APIRouter(prefix="/api/v1", tags=["upload"])
 @router.post("/upload-game-report/")
 async def upload_game_report(
     file: UploadFile = File(...),
+    reporter_discord_id: str = Form(...),
     db = Depends(get_database),
 ):
     raw = await file.read()
     svc = MatchService(db)
     try:
-        created = await svc.create_from_save(raw)
+        created = await svc.create_from_save(raw, reporter_discord_id)
         logger.info(f"✅ Stored match {created['match_id']}")
         return created
     except ParseError as e:

@@ -25,6 +25,7 @@ class MatchResponse(BaseModel):
     confirmed: bool
     flagged: bool
     flagged_by: Optional[str] = None
+    reporter_discord_id: str
 
 class MatchUpdate(BaseModel):
     match_id: str
