@@ -87,3 +87,26 @@ class MatchService:
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Updated match {match_id}")
         return updated
+
+    async def change_order(self, match_id: str, new_order: str) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.col.find_one({"_id": oid})
+        logger.info(f"{res['players']}")
+        if res == None:
+            raise NotFoundError("Match not found")
+        new_order_list = new_order.split(' ')
+        if len(new_order_list) != len(res['players']):
+            raise MatchServiceError(f"New order length does not match number of players ({len(res['players'])})")
+        new_order_set = set(new_order_list)
+        for i in range(1, len(res['players']) + 1):
+            if str(i) not in new_order_set:
+                raise MatchServiceError(f"New order must contain all player numbers from 1 to {len(res['players'])}")
+        changes = {}
+        for i, player in enumerate(res['players']):
+            changes[f"players.{i}.placement"] = int(new_order_list[i])
+        logger.info(f"{res['players']}")
+        await self.col.update_one({"_id": oid}, {"$set": changes})
+        logger.info(f"✅ 🔄 Changed player order for match {match_id}")
+        updated = await self.col.find_one({"_id": oid})
+        updated["match_id"] = str(updated.pop("_id"))
+        return updated
