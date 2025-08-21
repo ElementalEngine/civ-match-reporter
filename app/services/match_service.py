@@ -133,5 +133,5 @@ class MatchService:
         await self.col.update_one({"_id": oid}, {"$set": changes})
         updated = await self.col.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
-        logger.info(f"✅ 🔄 Match {match_id}, player quit triggered {updated}")
+        logger.info(f"✅ 🔄 Match {match_id}, player {quitter_discord_id} quit triggered")
         return updated
