@@ -92,7 +92,6 @@ class MatchService:
     async def change_order(self, match_id: str, new_order: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         res = await self.col.find_one({"_id": oid})
-        logger.info(f"{res['players']}")
         if res == None:
             raise NotFoundError("Match not found")
         new_order_list = new_order.split(' ')
@@ -105,9 +104,18 @@ class MatchService:
         changes = {}
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.placement"] = int(new_order_list[i])
-        logger.info(f"{res['players']}")
         await self.col.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
         updated = await self.col.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
         return updated
+
+    async def delete_pending_match(self, match_id: str) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.col.find_one({"_id": oid})
+        if res == None:
+            raise NotFoundError("Match not found")
+        res["match_id"] = str(res.pop("_id"))
+        await self.col.delete_one({"_id": oid})
+        logger.info(f"✅ 🔄 Match {match_id} removed")
+        return res
