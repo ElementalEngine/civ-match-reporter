@@ -11,6 +11,8 @@ class PlayerModel(BaseModel):
     player_alive: Optional[bool] = None
     discord_id: Optional[str] = None
     placement: Optional[int] = None
+    quit: bool = False
+    sub_of: Optional[str] = None
 
 class MatchModel(BaseModel):
     game: str  # parsers return "civ6" or "civ7"

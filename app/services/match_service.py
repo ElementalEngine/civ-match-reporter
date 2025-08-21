@@ -119,3 +119,19 @@ class MatchService:
         await self.col.delete_one({"_id": oid})
         logger.info(f"✅ 🔄 Match {match_id} removed")
         return res
+
+    async def trigger_quit(self, match_id: str, quitter_discord_id: str) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.col.find_one({"_id": oid})
+        if res == None:
+            raise NotFoundError("Match not found")
+        changes = {}
+        for i, player in enumerate(res['players']):
+            if player.get('discord_id') == quitter_discord_id:
+                changes[f"players.{i}.quit"] = False if res['players'][i]['quit'] else True
+                break
+        await self.col.update_one({"_id": oid}, {"$set": changes})
+        updated = await self.col.find_one({"_id": oid})
+        updated["match_id"] = str(updated.pop("_id"))
+        logger.info(f"✅ 🔄 Match {match_id}, player quit triggered {updated}")
+        return updated

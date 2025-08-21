@@ -11,6 +11,8 @@ class PlayerSchema(BaseModel):
     player_alive: Optional[bool] = None
     discord_id: Optional[str] = None
     placement: Optional[int] = None
+    quit: bool
+    sub_of: Optional[str] = None
 
 class MatchResponse(BaseModel):
     match_id: str
@@ -40,3 +42,7 @@ class ChangeOrder(BaseModel):
 
 class DeletePendingMatch(BaseModel):
     match_id: str
+
+class TriggerQuit(BaseModel):
+    match_id: str
+    quitter_discord_id: str
