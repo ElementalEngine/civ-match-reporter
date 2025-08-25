@@ -50,8 +50,14 @@ class MatchService:
         return match
 
     async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str) -> Dict[str, Any]:
+        parsed = self._parse_save(file_bytes)
         m = hashlib.sha256()
-        m.update(file_bytes)
+        unique_data = ','.join(
+            [parsed['game']] + 
+            [parsed['map_type']] +
+            [p['civ'] + (p['leader'] if 'leader' in p else '') for p in parsed['players']]
+        )
+        m.update(unique_data.encode('utf-8'))
         save_file_hash = m.hexdigest()
         res = await self.col.find_one({"save_file_hash": save_file_hash})
         if res:
@@ -60,7 +66,6 @@ class MatchService:
             res["match_id"] = match_id
             res['repeated'] = True
             return res
-        parsed = self._parse_save(file_bytes)
         parsed['save_file_hash'] = save_file_hash
         parsed['repeated'] = False
         parsed['reporter_discord_id'] = reporter_discord_id
