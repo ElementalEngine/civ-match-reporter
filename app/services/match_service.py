@@ -16,7 +16,8 @@ class NotFoundError(MatchServiceError): ...
 class MatchService:
     def __init__(self, db):
         self.db = db
-        self.col = db["civ_match_reporter"].pending_matches
+        self.pending_matches = db["civ_match_reporter"].pending_matches
+        self.validated_matches = db["civ_match_reporter"].validated_matches
         self.players = db["players"].players
 
     @staticmethod
@@ -59,7 +60,7 @@ class MatchService:
         )
         m.update(unique_data.encode('utf-8'))
         save_file_hash = m.hexdigest()
-        res = await self.col.find_one({"save_file_hash": save_file_hash})
+        res = await self.pending_matches.find_one({"save_file_hash": save_file_hash})
         if res:
             match_id = str(res["_id"])
             del res["_id"]
@@ -71,12 +72,12 @@ class MatchService:
         parsed['reporter_discord_id'] = reporter_discord_id
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
-        res = await self.col.insert_one(match.dict())
+        res = await self.pending_matches.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
 
     async def get(self, match_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
-        doc = await self.col.find_one({"_id": oid})
+        doc = await self.pending_matches.find_one({"_id": oid})
         if not doc:
             raise NotFoundError("Match not found")
         doc["match_id"] = str(doc.pop("_id"))
@@ -86,17 +87,17 @@ class MatchService:
         if not update_data:
             raise MatchServiceError("Empty update payload")
         oid = self._to_oid(match_id)
-        res = await self.col.update_one({"_id": oid}, {"$set": update_data})
+        res = await self.pending_matches.update_one({"_id": oid}, {"$set": update_data})
         if res.matched_count == 0:
             raise NotFoundError("Match not found")
-        updated = await self.col.find_one({"_id": oid})
+        updated = await self.pending_matches.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Updated match {match_id}")
         return updated
 
     async def change_order(self, match_id: str, new_order: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
-        res = await self.col.find_one({"_id": oid})
+        res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
             raise NotFoundError("Match not found")
         new_order_list = new_order.split(' ')
@@ -109,25 +110,25 @@ class MatchService:
         changes = {}
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.placement"] = int(new_order_list[i])
-        await self.col.update_one({"_id": oid}, {"$set": changes})
+        await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
-        updated = await self.col.find_one({"_id": oid})
+        updated = await self.pending_matches.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
         return updated
 
     async def delete_pending_match(self, match_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
-        res = await self.col.find_one({"_id": oid})
+        res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
             raise NotFoundError("Match not found")
         res["match_id"] = str(res.pop("_id"))
-        await self.col.delete_one({"_id": oid})
+        await self.pending_matches.delete_one({"_id": oid})
         logger.info(f"✅ 🔄 Match {match_id} removed")
         return res
 
     async def trigger_quit(self, match_id: str, quitter_discord_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
-        res = await self.col.find_one({"_id": oid})
+        res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
             raise NotFoundError("Match not found")
         changes = {}
@@ -135,8 +136,8 @@ class MatchService:
             if player.get('discord_id') == quitter_discord_id:
                 changes[f"players.{i}.quit"] = False if res['players'][i]['quit'] else True
                 break
-        await self.col.update_one({"_id": oid}, {"$set": changes})
-        updated = await self.col.find_one({"_id": oid})
+        await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
+        updated = await self.pending_matches.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Match {match_id}, player {quitter_discord_id} quit triggered")
         return updated
