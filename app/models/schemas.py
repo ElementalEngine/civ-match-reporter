@@ -12,6 +12,7 @@ class PlayerSchema(BaseModel):
     discord_id: Optional[str] = None
     placement: Optional[int] = None
     quit: bool
+    delta: float = 0.0
     sub_of: Optional[str] = None
 
 class MatchResponse(BaseModel):

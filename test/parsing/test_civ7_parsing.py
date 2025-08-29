@@ -78,7 +78,7 @@ def test_parse_civ7_save_3v3_T10():
         file_path='../data/civ7TestSaves/3v3_T10.Civ7Save',
         expected_game='civ7',
         expected_turn=10,
-        expected_mode='team',
+        expected_mode='Teamer',
         expected_map_type='Continents Plus',
         expected_players=expected_players
     )
@@ -125,7 +125,7 @@ def test_parse_civ7_save_5player_ffa():
         file_path='../data/civ7TestSaves/5playerFFA.Civ7Save',
         expected_game='civ7',
         expected_turn=18,
-        expected_mode='ffa',
+        expected_mode='FFA',
         expected_map_type='Continents',
         expected_players=expected_players
     )
@@ -151,7 +151,7 @@ def test_parse_civ7_save_duel():
         file_path='../data/civ7TestSaves/duel.Civ7Save',
         expected_game='civ7',
         expected_turn=1,
-        expected_mode='duel',
+        expected_mode='Duel',
         expected_map_type='Archipelago',
         expected_players=expected_players
     )

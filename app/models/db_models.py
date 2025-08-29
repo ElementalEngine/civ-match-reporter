@@ -1,6 +1,22 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
+
+class CivCount(BaseModel):
+    civ: str
+    count: int
+
+class StatModel(BaseModel):
+    id: int  # discord_id
+    mu: float
+    sigma: float
+    games: int
+    wins: int
+    first: int
+    subbedIn: int
+    subbedOut: int
+    civs: Optional[Dict[str, int]] = None
+    lastModified: datetime = Field(default_factory=datetime.utcnow)
 
 class PlayerModel(BaseModel):
     steam_id: Optional[str] = None
@@ -12,6 +28,7 @@ class PlayerModel(BaseModel):
     discord_id: Optional[str] = None
     placement: Optional[int] = None
     quit: bool = False
+    delta: float = 0.0
     sub_of: Optional[str] = None
 
 class MatchModel(BaseModel):
@@ -19,7 +36,8 @@ class MatchModel(BaseModel):
     turn: int
     age: Optional[int] = None
     map_type: str
-    game_mode: str  # allow "", "ffa", "team", "duel"
+    game_mode: str  # allow "", "FFA", "Teamer", "Duel"
+    is_cloud: bool
     players: List[PlayerModel]
     parser_version: str
     created_at: datetime = Field(default_factory=datetime.utcnow)

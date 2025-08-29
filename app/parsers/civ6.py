@@ -9,10 +9,10 @@ def determine_game_mode(players):
     teams = [p['team'] for p in players]
     unique_teams = set(teams)
     if len(players) == 2:
-        return "duel"
+        return "Duel"
     if len(unique_teams) == len(players):
-        return "ffa"
-    return "team"
+        return "FFA"
+    return "Teamer"
 
 def extract_player_info(root):
     players = []

@@ -44,7 +44,7 @@ def test_parse_civ6_save_teamer():
         file_path='../data/civ6TestSaves/teamer.Civ6Save',
         expected_game='civ6',
         expected_turn=51,
-        expected_mode='team',
+        expected_mode='Teamer',
         expected_map_type='Seven_Seas',
         expected_players=expected_players
     )
@@ -126,7 +126,7 @@ def test_parse_civ6_save_10player_ffa():
         file_path='../data/civ6TestSaves/10playerFFA.Civ6Save',
         expected_game='civ6',
         expected_turn=106,
-        expected_mode='ffa',
+        expected_mode='FFA',
         expected_map_type='Pangaea',
         expected_players=expected_players
     )
@@ -148,7 +148,7 @@ def test_parse_civ6_save_5team():
         file_path='../data/civ6TestSaves/5team.Civ6Save',
         expected_game='civ6',
         expected_turn=1,
-        expected_mode='team',
+        expected_mode='Teamer',
         expected_map_type='Pangaea',
         expected_players=excepted_players
     )
