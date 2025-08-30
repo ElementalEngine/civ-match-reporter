@@ -9,6 +9,7 @@ from app.models.db_models import MatchModel, StatModel, PlayerModel
 from trueskill import Rating
 from app.services.skill import make_ts_env
 import hashlib
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class InvalidIDError(MatchServiceError): ...
 class ParseError(MatchServiceError): ...
 class NotFoundError(MatchServiceError): ...
 
+approve_lock = asyncio.Lock()
 class MatchService:
     def __init__(self, db):
         self.db = db
@@ -135,7 +137,7 @@ class MatchService:
             print('p: ', p)
             p_current_ranking = players_current_ranking[p.steam_id]
             p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
-        return match
+        return match, post
 
     async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
@@ -160,7 +162,7 @@ class MatchService:
         parsed['is_cloud'] = is_cloud
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
-        match = await self.update_player_stats(match)
+        match, _ = await self.update_player_stats(match)
         res = await self.pending_matches.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
 
@@ -199,7 +201,7 @@ class MatchService:
         for i, player in enumerate(res['players']):
             res["players"][i]["placement"] = int(new_order_list[i])
         match = MatchModel(**res)
-        match = await self.update_player_stats(match)
+        match, _ = await self.update_player_stats(match)
         changes = {}
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.placement"] = int(new_order_list[i])
@@ -236,3 +238,38 @@ class MatchService:
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Match {match_id}, player {quitter_discord_id} quit triggered")
         return updated
+    
+    async def approve_match(self, match_id: str) -> Dict[str, Any]:
+        # Use a lock to make sure only one approval happens at a time
+        async with approve_lock:
+            oid = self._to_oid(match_id)
+            res = await self.pending_matches.find_one({"_id": oid})
+            if res == None:
+                raise NotFoundError("Match not found")
+            match = MatchModel(**res)
+            for i, player in enumerate(match.players):
+                if player.discord_id == None:
+                    raise MatchServiceError(f"Player {player.user_name} has no linked Discord ID")
+            match, post = await self.update_player_stats(match)
+            stats_table = self.get_stat_table(match.is_cloud, match.game_mode)
+            for i, player in enumerate(match.players):
+                changes = {}
+                player_new_stats = post.get(player.discord_id)
+                changes[f"mu"] = player_new_stats.mu
+                changes[f"sigma"] = player_new_stats.sigma
+                changes[f"games"] = player_new_stats.games
+                changes[f"wins"] = player_new_stats.wins
+                changes[f"first"] = player_new_stats.first
+                changes[f"subbedIn"] = player_new_stats.subbedIn
+                changes[f"subbedOut"] = player_new_stats.subbedOut
+                if player.civ:
+                    civs = player.civs
+                    civs[player.civ] = civs.get(player.civ, 0) + 1
+                    changes[f"civs"] = civs
+                print('player: ', player)
+                print('changes: ', changes)
+                # await stats_table.update_one({"_id": player.discord_id}, {"$set": changes})
+            # validated = await self.validated_matches.insert_one(match.dict())
+            # await self.pending_matches.delete_one({"_id": oid})
+            logger.info(f"✅ 🔄 Match {match_id} approved")
+            return match

@@ -47,3 +47,6 @@ class DeletePendingMatch(BaseModel):
 class TriggerQuit(BaseModel):
     match_id: str
     quitter_discord_id: str
+    
+class ApproveMatch(BaseModel):
+    match_id: str

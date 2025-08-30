@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Form
 from app.dependencies import get_database
-from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit
+from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, ApproveMatch
 from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,19 @@ async def trigger_quit(payload: TriggerQuit = Form(), db = Depends(get_database)
     except InvalidIDError:
         logger.error(f"🔴 Invalid quitter discord ID: {match_id}, quitter_discord_id: {quitter_discord_id}")
         raise HTTPException(status_code=400, detail="Invalid match ID")
+    except NotFoundError:
+        logger.warning(f"🔴 Match not found. matchID: {match_id}")
+        raise HTTPException(status_code=404, detail="Match not found")
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.put("/approve-match/", response_model=MatchResponse)
+async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_database)):
+    svc = MatchService(db)
+    match_id = payload.match_id
+    try:
+        return await svc.approve_match(match_id)
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
