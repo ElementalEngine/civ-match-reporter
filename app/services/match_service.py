@@ -136,12 +136,6 @@ class MatchService:
             p_current_ranking = players_current_ranking[p.steam_id]
             p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
         return match
-        # stat_table = self.get_stat_table(match["is_cloud"], match["game_mode"])
-        # stat_table.update_many(
-        #     {"_id": {"$in": [p._id for p in post.values()]}},
-        #     {"$set": {k: v for p in post.values() for k, v in p.dict().items()}},
-        #     upsert=True,
-        # )
 
     async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
