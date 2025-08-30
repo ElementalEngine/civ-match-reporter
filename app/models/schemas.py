@@ -48,5 +48,10 @@ class TriggerQuit(BaseModel):
     match_id: str
     quitter_discord_id: str
     
+class AssignDiscordId(BaseModel):
+    match_id: str
+    player_id: str
+    discord_id: str
+    
 class ApproveMatch(BaseModel):
     match_id: str

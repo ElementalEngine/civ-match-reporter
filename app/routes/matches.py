@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Form
 from app.dependencies import get_database
-from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, ApproveMatch
+from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AssignDiscordId, ApproveMatch
 from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,24 @@ async def trigger_quit(payload: TriggerQuit = Form(), db = Depends(get_database)
     except InvalidIDError:
         logger.error(f"🔴 Invalid quitter discord ID: {match_id}, quitter_discord_id: {quitter_discord_id}")
         raise HTTPException(status_code=400, detail="Invalid match ID")
+    except NotFoundError:
+        logger.warning(f"🔴 Match not found. matchID: {match_id}")
+        raise HTTPException(status_code=404, detail="Match not found")
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.put("/assign-discord-id/", response_model=MatchResponse)
+async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_database)):
+    svc = MatchService(db)
+    match_id = payload.match_id
+    player_id = payload.player_id
+    discord_id = payload.discord_id
+    try:
+        return await svc.assign_discord_id(match_id, player_id, discord_id)
+    except InvalidIDError:
+        logger.error(f"🔴 Invalid player ID: {match_id}, player_id: {player_id}, discord_id: {discord_id}")
+        raise HTTPException(status_code=400, detail="Invalid player ID")
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
