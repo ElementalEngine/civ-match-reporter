@@ -4,12 +4,14 @@ from typing import Any, Dict, List
 from bson import ObjectId
 from bson.int64 import Int64
 from app.parsers import parse_civ7_save, parse_civ6_save  # do not modify parser code
+from app.utils import get_cpl_name
 from app.config import settings
 from app.models.db_models import MatchModel, StatModel, PlayerModel
 from trueskill import Rating
 from app.services.skill import make_ts_env
 import hashlib
 import asyncio
+from datetime import datetime, UTC
 
 logger = logging.getLogger(__name__)
 
@@ -104,18 +106,14 @@ class MatchService:
         teams = defaultdict(list)
         for p in match.players:
             teams[p.team].append(p)
-        print('teams: ', teams)
         team_states: List[List[StatModel]] = [
             [players_current_ranking[p.steam_id] for p in teams[team]] for team in teams
         ]
         ts_teams = [[Rating(p.mu, p.sigma) for p in team] for team in team_states]
-        print('ts_teams: ', ts_teams)
         placements = [teams[team][0].placement for team in teams]
-        print('placements: ', placements)
 
         ts_env = make_ts_env()
         new_ts = ts_env.rate(ts_teams, ranks=placements)
-        print('new_ts: ', new_ts)
 
         post: Dict[str, StatModel] = {}
         for t_idx, team in enumerate(team_states):
@@ -127,12 +125,11 @@ class MatchService:
                     sigma=float(r.sigma),
                     games=pre.games + 1,
                     wins=pre.wins + (1 if pre.mu < r.mu else 0),
-                    first=pre.first + (1 if placements[t_idx] == 1 else 0),
+                    first=pre.first + (1 if placements[t_idx] == 0 else 0),
                     subbedIn=pre.subbedIn,
                     subbedOut=pre.subbedOut,
                     civs=pre.civs,
                 )
-        print('post: ', post)
         for p in match.players:
             print('p: ', p)
             p_current_ranking = players_current_ranking[p.steam_id]
@@ -199,14 +196,13 @@ class MatchService:
             if str(i) not in new_order_set:
                 raise MatchServiceError(f"New order must contain all player numbers from 1 to {len(res['players'])}")
         for i, player in enumerate(res['players']):
-            res["players"][i]["placement"] = int(new_order_list[i])
+            res["players"][i]["placement"] = int(new_order_list[i] - 1)
         match = MatchModel(**res)
         match, _ = await self.update_player_stats(match)
         changes = {}
         for i, player in enumerate(res['players']):
-            changes[f"players.{i}.placement"] = int(new_order_list[i])
+            changes[f"players.{i}.placement"] = int(new_order_list[i] - 1)
             changes[f"players.{i}.delta"] = match.players[i].delta
-        print('changes: ', changes)
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})
@@ -253,7 +249,6 @@ class MatchService:
         changes[f"players.{int(player_id)-1}.discord_id"] = discord_id
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.delta"] = match.players[i].delta
-        print('changes: ', changes)
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Assigned player id for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})
@@ -272,6 +267,7 @@ class MatchService:
                 if player.discord_id == None:
                     raise MatchServiceError(f"Player {player.user_name} has no linked Discord ID")
             match, post = await self.update_player_stats(match)
+            match.approved_at = datetime.now(UTC)
             stats_table = self.get_stat_table(match.is_cloud, match.game_mode)
             for i, player in enumerate(match.players):
                 changes = {}
@@ -284,13 +280,12 @@ class MatchService:
                 changes[f"subbedIn"] = player_new_stats.subbedIn
                 changes[f"subbedOut"] = player_new_stats.subbedOut
                 if player.civ:
-                    civs = player.civs
-                    civs[player.civ] = civs.get(player.civ, 0) + 1
+                    civs = player_new_stats.civs
+                    player_civ_leader = get_cpl_name(match.game, player.civ, player.leader)
+                    civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
                     changes[f"civs"] = civs
-                print('player: ', player)
-                print('changes: ', changes)
-                # await stats_table.update_one({"_id": player.discord_id}, {"$set": changes})
-            # validated = await self.validated_matches.insert_one(match.dict())
-            # await self.pending_matches.delete_one({"_id": oid})
+                await stats_table.update_one({"_id": player.discord_id}, {"$set": changes})
+            validated = await self.validated_matches.insert_one(match.dict())
+            await self.pending_matches.delete_one({"_id": oid})
             logger.info(f"✅ 🔄 Match {match_id} approved")
-            return match
+            return {"match_id": str(validated.inserted_id), **match.dict()}

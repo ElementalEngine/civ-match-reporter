@@ -25,7 +25,7 @@ class MatchResponse(BaseModel):
     players: List[PlayerSchema]
     parser_version: str
     created_at: datetime
-    confirmed: bool
+    approved_at: Optional[datetime] = None
     flagged: bool
     flagged_by: Optional[str] = None
     reporter_discord_id: str
