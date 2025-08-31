@@ -131,7 +131,6 @@ class MatchService:
                     civs=pre.civs,
                 )
         for p in match.players:
-            print('p: ', p)
             p_current_ranking = players_current_ranking[p.steam_id]
             p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
         return match, post
@@ -269,23 +268,34 @@ class MatchService:
             match, post = await self.update_player_stats(match)
             match.approved_at = datetime.now(UTC)
             stats_table = self.get_stat_table(match.is_cloud, match.game_mode)
-            for i, player in enumerate(match.players):
-                changes = {}
-                player_new_stats = post.get(player.discord_id)
-                changes[f"mu"] = player_new_stats.mu
-                changes[f"sigma"] = player_new_stats.sigma
-                changes[f"games"] = player_new_stats.games
-                changes[f"wins"] = player_new_stats.wins
-                changes[f"first"] = player_new_stats.first
-                changes[f"subbedIn"] = player_new_stats.subbedIn
-                changes[f"subbedOut"] = player_new_stats.subbedOut
-                if player.civ:
-                    civs = player_new_stats.civs
-                    player_civ_leader = get_cpl_name(match.game, player.civ, player.leader)
-                    civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
-                    changes[f"civs"] = civs
-                await stats_table.update_one({"_id": player.discord_id}, {"$set": changes})
-            validated = await self.validated_matches.insert_one(match.dict())
-            await self.pending_matches.delete_one({"_id": oid})
+            session = await self.db.start_session()
+            async with session:
+                async with session.start_transaction():
+                    try:
+                        for i, player in enumerate(match.players):
+                            changes = {}
+                            player_new_stats = post.get(player.discord_id)
+                            changes[f"mu"] = player_new_stats.mu
+                            changes[f"sigma"] = player_new_stats.sigma
+                            changes[f"games"] = player_new_stats.games
+                            changes[f"wins"] = player_new_stats.wins
+                            changes[f"first"] = player_new_stats.first
+                            changes[f"subbedIn"] = player_new_stats.subbedIn
+                            changes[f"subbedOut"] = player_new_stats.subbedOut
+                            if player.civ:
+                                civs = player_new_stats.civs
+                                player_civ_leader = get_cpl_name(match.game, player.civ, player.leader)
+                                civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
+                                changes[f"civs"] = civs
+                            await stats_table.update_one({"_id": player.discord_id}, {"$set": changes}, session=session)
+                        validated = await self.validated_matches.insert_one(match.dict(), session=session)
+                        await self.pending_matches.delete_one({"_id": oid}, session=session)
+                        # Commit the transaction
+                        await session.commit_transaction()
+                    except Exception as e:
+                        # Abort the transaction in case of an error
+                        print("An error occurred while writing to DB:", e)
+                        await session.abort_transaction()
+                        raise MatchServiceError(f"An error occured during writing to DB: {e}")
             logger.info(f"✅ 🔄 Match {match_id} approved")
             return {"match_id": str(validated.inserted_id), **match.dict()}
