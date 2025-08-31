@@ -195,12 +195,12 @@ class MatchService:
             if str(i) not in new_order_set:
                 raise MatchServiceError(f"New order must contain all player numbers from 1 to {len(res['players'])}")
         for i, player in enumerate(res['players']):
-            res["players"][i]["placement"] = int(new_order_list[i] - 1)
+            res["players"][i]["placement"] = int(new_order_list[i]) - 1
         match = MatchModel(**res)
         match, _ = await self.update_player_stats(match)
         changes = {}
         for i, player in enumerate(res['players']):
-            changes[f"players.{i}.placement"] = int(new_order_list[i] - 1)
+            changes[f"players.{i}.placement"] = int(new_order_list[i]) - 1
             changes[f"players.{i}.delta"] = match.players[i].delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
