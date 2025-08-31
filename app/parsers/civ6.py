@@ -18,6 +18,8 @@ def extract_player_info(root):
     players = []
     for p in root['parsed']['CIVS']:
         civ = p['LEADER_NAME']['data']
+        if civ == 'LEADER_SPECTATOR':
+            continue
         team = int(p['TEAM_ID']['data']) if 'TEAM_ID' in p else 0
         steam_id = p['USER_ID']['data'].split('@')[-1] if 'USER_ID' in p else None
         user_name = p['USER_ID']['data'].split('@')[0] if 'USER_ID' in p else None
