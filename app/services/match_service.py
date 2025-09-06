@@ -187,21 +187,22 @@ class MatchService:
         res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
             raise NotFoundError("Match not found")
-        new_order_list = new_order.split(' ')
-        if len(new_order_list) != len(res['players']):
-            raise MatchServiceError(f"New order length does not match number of players ({len(res['players'])})")
-        new_order_set = set(new_order_list)
-        for i in range(1, len(res['players']) + 1):
-            if str(i) not in new_order_set:
-                raise MatchServiceError(f"New order must contain all player numbers from 1 to {len(res['players'])}")
-        for i, player in enumerate(res['players']):
-            res["players"][i]["placement"] = int(new_order_list[i]) - 1
         match = MatchModel(**res)
+        num_teams = len({player.team for player in match.players})
+        new_order_list = new_order.split(' ')
+        if len(new_order_list) != num_teams:
+            raise MatchServiceError(f"New order length does not match number of players/teams ({num_teams})")
+        new_order_set = set(new_order_list)
+        for i in range(1, num_teams + 1):
+            if str(i) not in new_order_set:
+                raise MatchServiceError(f"New order must contain all player/team numbers from 1 to {num_teams}")
+        for i, player in enumerate(match.players):
+            player.placement = int(new_order_list[player.team]) - 1
         match, _ = await self.update_player_stats(match)
         changes = {}
-        for i, player in enumerate(res['players']):
-            changes[f"players.{i}.placement"] = int(new_order_list[i]) - 1
-            changes[f"players.{i}.delta"] = match.players[i].delta
+        for i, player in enumerate(match.players):
+            changes[f"players.{i}.placement"] = player.placement
+            changes[f"players.{i}.delta"] = player.delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})

@@ -16,11 +16,16 @@ def determine_game_mode(players):
 
 def extract_player_info(root):
     players = []
+    teams_dict = {}
     for p in root['parsed']['CIVS']:
         civ = p['LEADER_NAME']['data']
         if civ == 'LEADER_SPECTATOR':
             continue
         team = int(p['TEAM_ID']['data']) if 'TEAM_ID' in p else 0
+        # normalize team ids to 0..n-1 where n is the number of teams
+        if team not in teams_dict:
+            teams_dict[team] = len(teams_dict)
+        team = teams_dict[team]
         steam_id = p['USER_ID']['data'].split('@')[-1] if 'USER_ID' in p else None
         user_name = p['USER_ID']['data'].split('@')[0] if 'USER_ID' in p else None
         player_alive = bool(p['PLAYER_ALIVE']['data'])
