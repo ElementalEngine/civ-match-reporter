@@ -255,7 +255,7 @@ class MatchService:
         updated["match_id"] = str(updated.pop("_id"))
         return updated
 
-    async def approve_match(self, match_id: str) -> Dict[str, Any]:
+    async def approve_match(self, match_id: str, approver_discord_id: str) -> Dict[str, Any]:
         # Use a lock to make sure only one approval happens at a time
         async with approve_lock:
             oid = self._to_oid(match_id)
@@ -268,6 +268,7 @@ class MatchService:
                     raise MatchServiceError(f"Player {player.user_name} has no linked Discord ID")
             match, post = await self.update_player_stats(match)
             match.approved_at = datetime.now(UTC)
+            match.approver_discord_id = approver_discord_id
             stats_table = self.get_stat_table(match.is_cloud, match.game_mode)
             session = await self.db.start_session()
             async with session:

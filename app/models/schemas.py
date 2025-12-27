@@ -26,6 +26,7 @@ class MatchResponse(BaseModel):
     parser_version: str
     created_at: datetime
     approved_at: Optional[datetime] = None
+    approver_discord_id: str = None
     flagged: bool
     flagged_by: Optional[str] = None
     reporter_discord_id: str
@@ -52,6 +53,7 @@ class AssignDiscordId(BaseModel):
     match_id: str
     player_id: str
     discord_id: str
-    
+
 class ApproveMatch(BaseModel):
     match_id: str
+    approver_discord_id: str

@@ -107,8 +107,9 @@ async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_
 async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_database)):
     svc = MatchService(db)
     match_id = payload.match_id
+    approver_discord_id = payload.approver_discord_id
     try:
-        return await svc.approve_match(match_id)
+        return await svc.approve_match(match_id, approver_discord_id)
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
