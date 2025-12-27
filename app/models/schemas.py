@@ -26,7 +26,7 @@ class MatchResponse(BaseModel):
     parser_version: str
     created_at: datetime
     approved_at: Optional[datetime] = None
-    approver_discord_id: str = None
+    approver_discord_id: Optional[str] = None
     flagged: bool
     flagged_by: Optional[str] = None
     reporter_discord_id: str
