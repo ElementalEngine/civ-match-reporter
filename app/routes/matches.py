@@ -57,8 +57,9 @@ async def change_order(payload: ChangeOrder = Form(), db = Depends(get_database)
     svc = MatchService(db)
     match_id = payload.match_id
     new_order = payload.new_order
+    discord_message_id = payload.discord_message_id
     try:
-        return await svc.change_order(match_id, new_order)
+        return await svc.change_order(match_id, new_order, discord_message_id)
     except InvalidIDError:
         logger.error(f"🔴 Invalid match ID: {match_id}")
         raise HTTPException(status_code=400, detail="Invalid match ID")

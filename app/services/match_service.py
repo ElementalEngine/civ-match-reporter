@@ -195,7 +195,7 @@ class MatchService:
         logger.info(f"✅ 🔄 Updated match {match_id}")
         return updated
 
-    async def change_order(self, match_id: str, new_order: str) -> Dict[str, Any]:
+    async def change_order(self, match_id: str, new_order: str, discord_message_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
@@ -213,6 +213,7 @@ class MatchService:
             player.placement = int(new_order_list[player.team]) - 1
         match, _ = await self.update_player_stats(match)
         changes = {}
+        changes["discord_messages_id_list"] = res['discord_messages_id_list'] + [discord_message_id]
         for i, player in enumerate(match.players):
             changes[f"players.{i}.placement"] = player.placement
             changes[f"players.{i}.delta"] = player.delta

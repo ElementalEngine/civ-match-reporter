@@ -42,6 +42,7 @@ class MatchUpdate(BaseModel):
 class ChangeOrder(BaseModel):
     match_id: str
     new_order: str # The order of players as a string, e.g. "1 2 3 4" separated by spaces
+    discord_message_id: str
 
 class DeletePendingMatch(BaseModel):
     match_id: str
