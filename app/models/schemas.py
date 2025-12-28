@@ -58,7 +58,8 @@ class AppendDiscordMessageID(BaseModel):
 class AssignDiscordId(BaseModel):
     match_id: str
     player_id: str
-    discord_id: str
+    player_discord_id: str
+    discord_message_id: str
 
 class ApproveMatch(BaseModel):
     match_id: str

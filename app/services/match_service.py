@@ -249,7 +249,7 @@ class MatchService:
         logger.info(f"✅ 🔄 Match {match_id}, player {quitter_discord_id} quit triggered")
         return updated
 
-    async def assign_discord_id(self, match_id: str, player_id: str, discord_id: str) -> Dict[str, Any]:
+    async def assign_discord_id(self, match_id: str, player_id: str, player_discord_id: str, discord_message_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
@@ -257,10 +257,11 @@ class MatchService:
         match = MatchModel(**res)
         if int(player_id) < 1 or int(player_id) > len(match.players):
             raise MatchServiceError("Player ID out of range. Must be between 1 and number of players")
-        match.players[int(player_id)-1].discord_id = discord_id
+        match.players[int(player_id)-1].discord_id = player_discord_id
         match, _ = await self.update_player_stats(match)
         changes = {}
-        changes[f"players.{int(player_id)-1}.discord_id"] = discord_id
+        changes["discord_messages_id_list"] = res['discord_messages_id_list'] + [discord_message_id]
+        changes[f"players.{int(player_id)-1}.discord_id"] = player_discord_id
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.delta"] = match.players[i].delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})

@@ -108,11 +108,12 @@ async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_
     svc = MatchService(db)
     match_id = payload.match_id
     player_id = payload.player_id
-    discord_id = payload.discord_id
+    player_discord_id = payload.player_discord_id
+    discord_message_id = payload.discord_message_id
     try:
-        return await svc.assign_discord_id(match_id, player_id, discord_id)
+        return await svc.assign_discord_id(match_id, player_id, player_discord_id, discord_message_id)
     except InvalidIDError:
-        logger.error(f"🔴 Invalid player ID: {match_id}, player_id: {player_id}, discord_id: {discord_id}")
+        logger.error(f"🔴 Invalid player ID: {match_id}, player_id: {player_id}, discord_id: {player_discord_id}")
         raise HTTPException(status_code=400, detail="Invalid player ID")
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")
