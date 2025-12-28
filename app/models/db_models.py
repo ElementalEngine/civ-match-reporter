@@ -40,6 +40,7 @@ class MatchModel(BaseModel):
     is_cloud: bool
     players: List[PlayerModel]
     parser_version: str
+    message_id: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     approved_at: Optional[datetime] = None
     approver_discord_id: Optional[str] = None

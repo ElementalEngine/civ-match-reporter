@@ -34,7 +34,7 @@ async def update_match(payload: MatchUpdate = Form(), db = Depends(get_database)
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/change-order/", response_model=MatchResponse)
 async def change_order(payload: ChangeOrder = Form(), db = Depends(get_database)):
     svc = MatchService(db)
@@ -67,7 +67,7 @@ async def delete_pending_match(payload: DeletePendingMatch = Form(), db = Depend
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/trigger-quit/", response_model=MatchResponse)
 async def trigger_quit(payload: TriggerQuit = Form(), db = Depends(get_database)):
     svc = MatchService(db)
@@ -84,7 +84,7 @@ async def trigger_quit(payload: TriggerQuit = Form(), db = Depends(get_database)
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/assign-discord-id/", response_model=MatchResponse)
 async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_database)):
     svc = MatchService(db)
@@ -102,7 +102,7 @@ async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/approve-match/", response_model=MatchResponse)
 async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_database)):
     svc = MatchService(db)

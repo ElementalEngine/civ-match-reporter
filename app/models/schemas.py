@@ -24,6 +24,7 @@ class MatchResponse(BaseModel):
     game_mode: str
     players: List[PlayerSchema]
     parser_version: str
+    message_id: str
     created_at: datetime
     approved_at: Optional[datetime] = None
     approver_discord_id: Optional[str] = None

@@ -135,7 +135,7 @@ class MatchService:
             p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
         return match, post
 
-    async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool) -> Dict[str, Any]:
+    async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool, message_id: str) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         m = hashlib.sha256()
         unique_data = ','.join(
@@ -156,6 +156,7 @@ class MatchService:
         parsed['repeated'] = False
         parsed['reporter_discord_id'] = reporter_discord_id
         parsed['is_cloud'] = is_cloud
+        parsed['message_id'] = message_id
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
         match, _ = await self.update_player_stats(match)
