@@ -235,7 +235,7 @@ class MatchService:
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Match {match_id}, player {quitter_discord_id} quit triggered")
         return updated
-    
+
     async def assign_discord_id(self, match_id: str, player_id: str, discord_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         res = await self.pending_matches.find_one({"_id": oid})
