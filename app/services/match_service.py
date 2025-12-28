@@ -135,7 +135,7 @@ class MatchService:
             p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
         return match, post
 
-    async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool, message_id: str) -> Dict[str, Any]:
+    async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool, discord_message_id: str) -> Dict[str, Any]:
         parsed = self._parse_save(file_bytes)
         m = hashlib.sha256()
         unique_data = ','.join(
@@ -156,12 +156,24 @@ class MatchService:
         parsed['repeated'] = False
         parsed['reporter_discord_id'] = reporter_discord_id
         parsed['is_cloud'] = is_cloud
-        parsed['message_id'] = message_id
+        parsed['discord_messages_id_list'] = [discord_message_id]
         match = MatchModel(**parsed)
         match = await self.match_id_to_discord(match)
         match, _ = await self.update_player_stats(match)
         res = await self.pending_matches.insert_one(match.dict())
         return {"match_id": str(res.inserted_id), **match.dict()}
+    
+    async def append_discord_message_id_list(self, match_id: str, discord_message_id_list: list[str]) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.pending_matches.find_one({"_id": oid})
+        if not res:
+            raise NotFoundError("Match not found")
+        current_list = res.get("discord_messages_id_list", [])
+        updated_list = current_list + discord_message_id_list
+        await self.pending_matches.update_one({"_id": oid}, {"$set": {"discord_messages_id_list": updated_list}})
+        updated = await self.pending_matches.find_one({"_id": oid})
+        updated["match_id"] = str(updated.pop("_id"))
+        return updated
 
     async def get(self, match_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
@@ -220,7 +232,7 @@ class MatchService:
         logger.info(f"✅ 🔄 Match {match_id} removed")
         return res
 
-    async def trigger_quit(self, match_id: str, quitter_discord_id: str) -> Dict[str, Any]:
+    async def trigger_quit(self, match_id: str, quitter_discord_id: str, discord_message_id: str) -> Dict[str, Any]:
         oid = self._to_oid(match_id)
         res = await self.pending_matches.find_one({"_id": oid})
         if res == None:
@@ -230,6 +242,7 @@ class MatchService:
             if player.get('discord_id') == quitter_discord_id:
                 changes[f"players.{i}.quit"] = False if res['players'][i]['quit'] else True
                 break
+        changes["discord_messages_id_list"] = res['discord_messages_id_list'] + [discord_message_id]
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         updated = await self.pending_matches.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))

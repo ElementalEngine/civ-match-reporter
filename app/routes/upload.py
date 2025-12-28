@@ -11,14 +11,14 @@ async def upload_game_report(
     file: UploadFile = File(...),
     reporter_discord_id: str = Form(...),
     is_cloud: str = Form(...),
-    message_id: str = Form(...),
+    discord_message_id: str = Form(...),
     db = Depends(get_database),
 ):
     raw = await file.read()
     is_cloud_game = is_cloud == '1'
     svc = MatchService(db)
     try:
-        created = await svc.create_from_save(raw, reporter_discord_id, is_cloud_game, message_id)
+        created = await svc.create_from_save(raw, reporter_discord_id, is_cloud_game, discord_message_id)
         logger.info(f"✅ Stored match {created['match_id']}")
         return created
     except ParseError as e:
