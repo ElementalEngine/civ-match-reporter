@@ -22,6 +22,7 @@ class MatchResponse(BaseModel):
     age: Optional[int] = None
     map_type: str
     game_mode: str
+    is_cloud: bool
     players: List[PlayerSchema]
     parser_version: str
     discord_messages_id_list: List[str]
@@ -30,6 +31,7 @@ class MatchResponse(BaseModel):
     approver_discord_id: Optional[str] = None
     flagged: bool
     flagged_by: Optional[str] = None
+    save_file_hash: str
     reporter_discord_id: str
 
 class MatchUpdate(BaseModel):
