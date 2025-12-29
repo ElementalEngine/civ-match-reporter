@@ -382,7 +382,7 @@ class MatchService:
                                 player_civ_leader = get_cpl_name(match.game, player.civ, player.leader)
                                 civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
                                 player_stats_db[f"civs"] = civs
-                            await stats_table.replace_one({"_id": Int64(player.discord_id)}, player_stats_db, session=session)
+                            await stats_table.replace_one({"_id": Int64(player.discord_id)}, player_stats_db, upsert=True, session=session)
                         validated = await self.validated_matches.insert_one(match.dict(), session=session)
                         await self.pending_matches.delete_one({"_id": oid}, session=session)
                         # Commit the transaction

@@ -32,13 +32,13 @@ def _test_parse_civ6_save(file_path, expected_game, expected_turn, expected_mode
 def test_parse_civ6_save_teamer():
     expected_players = [
         {'steam_id': 'Calcifer', 'user_name': 'Calcifer', 'civ': 'LEADER_DIDO', 'team': 0, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_WILHELMINA', 'team': 1, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_VICTORIA', 'team': 1, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_POUNDMAKER', 'team': 0, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_SULEIMAN', 'team': 1, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_TOMYRIS', 'team': 0, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_GENGHIS_KHAN', 'team': 0, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_SHAKA', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_WILHELMINA', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_VICTORIA', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_POUNDMAKER', 'team': 0, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_SULEIMAN', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_TOMYRIS', 'team': 0, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_GENGHIS_KHAN', 'team': 0, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_SHAKA', 'team': 1, 'player_alive': True},
     ]
     _test_parse_civ6_save(
         file_path='../data/civ6TestSaves/teamer.Civ6Save',
@@ -130,19 +130,19 @@ def test_parse_civ6_save_10player_ffa():
         expected_map_type='Pangaea',
         expected_players=expected_players
     )
-    
+
 def test_parse_civ6_save_5team():
     excepted_players = [
         {'steam_id': '', 'user_name': '', 'civ': 'LEADER_ALEXANDER', 'team': 0, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_NADER_SHAH', 'team': 1, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_KUBLAI_KHAN_MONGOLIA', 'team': 2, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_JOAO_III', 'team': 3, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_AMANITORE', 'team': 4, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_SHAKA', 'team': 4, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_VICTORIA_ALT', 'team': 3, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_MONTEZUMA', 'team': 2, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_TAMAR', 'team': 1, 'player_alive': True},
-        {'steam_id': -1, 'user_name': '', 'civ': 'LEADER_YONGLE', 'team': 0, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_NADER_SHAH', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_KUBLAI_KHAN_MONGOLIA', 'team': 2, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_JOAO_III', 'team': 3, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_AMANITORE', 'team': 4, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_SHAKA', 'team': 4, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_VICTORIA_ALT', 'team': 3, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_MONTEZUMA', 'team': 2, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_TAMAR', 'team': 1, 'player_alive': True},
+        {'steam_id': None, 'user_name': None, 'civ': 'LEADER_YONGLE', 'team': 0, 'player_alive': True},
     ]
     _test_parse_civ6_save(
         file_path='../data/civ6TestSaves/5team.Civ6Save',
