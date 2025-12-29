@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Form
 from app.dependencies import get_database
-from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, AssignSub, ApproveMatch
+from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, AssignSub, RemoveSub, ApproveMatch
 from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
@@ -134,6 +134,24 @@ async def assign_sub(payload: AssignSub = Form(), db = Depends(get_database)):
         return await svc.assign_sub(match_id, sub_in_id, sub_out_discord_id, discord_message_id)
     except InvalidIDError:
         logger.error(f"🔴 Invalid player ID: {match_id}, sub_in_id: {sub_in_id}, sub_out_discord_id: {sub_out_discord_id}")
+        raise HTTPException(status_code=400, detail="Invalid player ID")
+    except NotFoundError:
+        logger.warning(f"🔴 Match not found. matchID: {match_id}")
+        raise HTTPException(status_code=404, detail="Match not found")
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.put("/remove-sub/", response_model=MatchResponse)
+async def remove_sub(payload: RemoveSub = Form(), db = Depends(get_database)):
+    svc = MatchService(db)
+    match_id = payload.match_id
+    sub_out_id = payload.sub_out_id
+    discord_message_id = payload.discord_message_id
+    try:
+        return await svc.remove_sub(match_id, sub_out_id, discord_message_id)
+    except InvalidIDError:
+        logger.error(f"🔴 Invalid player ID: {match_id}, sub_out_id: {sub_out_id}")
         raise HTTPException(status_code=400, detail="Invalid player ID")
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")

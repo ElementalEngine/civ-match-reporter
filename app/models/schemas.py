@@ -70,6 +70,11 @@ class AssignSub(BaseModel):
     sub_in_id: str
     sub_out_discord_id: str
     discord_message_id: str
+    
+class RemoveSub(BaseModel):
+    match_id: str
+    sub_out_id: str
+    discord_message_id: str
 
 class ApproveMatch(BaseModel):
     match_id: str

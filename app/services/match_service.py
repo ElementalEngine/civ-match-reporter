@@ -328,6 +328,24 @@ class MatchService:
         updated["match_id"] = str(updated.pop("_id"))
         logger.info(f"✅ 🔄 Match {match_id}, sub_in: {sub_in_id}, sub_out: {sub_out_discord_id}")
         return updated
+    
+    async def remove_sub(self, match_id: str, sub_out_id: str, discord_message_id: str) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.pending_matches.find_one({"_id": oid})
+        if res == None:
+            raise NotFoundError("Match not found")
+        match = MatchModel(**res)
+        if int(sub_out_id) < 1 or int(sub_out_id) >= len(match.players) or not match.players[int(sub_out_id)].subbed_out:
+            raise MatchServiceError("Sub in Player ID out of range. Must be between 1 and number of players - 1")
+        match.players[int(sub_out_id)-1].is_sub = False
+        match.players.pop(int(sub_out_id))
+        match, _ = await self.update_player_stats(match)
+        match.discord_messages_id_list = res['discord_messages_id_list'] + [discord_message_id]
+        await self.pending_matches.replace_one({"_id": oid}, match.dict())
+        updated = await self.pending_matches.find_one({"_id": oid})
+        updated["match_id"] = str(updated.pop("_id"))
+        logger.info(f"✅ 🔄 Match {match_id}, sub_out_id: {sub_out_id}")
+        return updated
 
     async def approve_match(self, match_id: str, approver_discord_id: str) -> Dict[str, Any]:
         # Use a lock to make sure only one approval happens at a time
