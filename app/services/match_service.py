@@ -50,27 +50,52 @@ class MatchService:
             return data
         except Exception as e:
             raise ParseError(f"⚠️ Parse attempt failed: {e}")
+        
+    async def discord_to_steam_id(self, discord_id: str) -> str:
+        player = await self.players.find_one({"discord_id": f"{discord_id}"})
+        if player:
+            return player.get("steam_id")
+        return None
+
+    async def steam_to_discord_id(self, steam_id: str) -> str:
+        player = await self.players.find_one({"steam_id": f"{steam_id}"})
+        if player:
+            return player.get("discord_id")
+        return None
 
     async def match_id_to_discord(self, match):
         for player in match.players:
             if player.steam_id and player.steam_id != '-1':
-                discord_id = await self.players.find_one({"steam_id": f"{player.steam_id}"})
-                if discord_id:
-                    player.discord_id = discord_id.get("discord_id")
+                player.discord_id = await self.steam_to_discord_id(player.steam_id)
         return match
 
     def get_stat_table(self, is_cloud: bool, match_type: str):
         match_table = ("PBC-" if is_cloud else "") + match_type
         return getattr(self.stats, match_table)
 
-    async def get_player_ranking(self, match: MatchModel, discord_id: str) -> StatModel:
+    async def get_player_ranking(self, match: MatchModel, discord_id: str, player_index: int) -> StatModel:
+        if discord_id == None:
+            return StatModel(
+                index=player_index,
+                id=0,
+                mu=settings.ts_mu,
+                sigma=settings.ts_sigma,
+                games=0,
+                wins=0,
+                first=0,
+                subbedIn=0,
+                subbedOut=0,
+                civs={},
+            )
         stat_table = self.get_stat_table(match.is_cloud, match.game_mode)
         player = await stat_table.find_one({"_id": Int64(discord_id)})
         if player:
             player['id'] = player.pop('_id')
+            player['index'] = player_index
             return StatModel(**player)
         else:
             return StatModel(
+                index=player_index,
                 id=discord_id,
                 mu=settings.ts_mu,
                 sigma=settings.ts_sigma,
@@ -82,57 +107,56 @@ class MatchService:
                 civs={},
             )
 
-    async def get_players_current_ranking(self, match: MatchModel) -> Dict[PlayerModel, StatModel]:
-        players_ranking = {}
-        for player in match.players:
-            if player.discord_id == None:
-                players_ranking[player.steam_id] = StatModel(
-                    id="0",
-                    mu=settings.ts_mu,
-                    sigma=settings.ts_sigma,
-                    games=0,
-                    wins=0,
-                    first=0,
-                    subbedIn=0,
-                    subbedOut=0,
-                )
-            else:
-                ranking = await self.get_player_ranking(match, player.discord_id)
-                players_ranking[player.steam_id] = ranking
+    async def get_players_current_ranking(self, match: MatchModel) -> List[StatModel]:
+        players_ranking = []
+        for player_index, player in enumerate(match.players):
+            ranking = await self.get_player_ranking(match, player.discord_id, player_index)
+            players_ranking.append(ranking)
         return players_ranking
 
     async def update_player_stats(self, match: MatchModel) -> MatchModel:
         players_current_ranking = await self.get_players_current_ranking(match)
         teams = defaultdict(list)
-        for p in match.players:
-            teams[p.team].append(p)
+        for i, p in enumerate(match.players):
+            teams[p.team].append((i, p))
         team_states: List[List[StatModel]] = [
-            [players_current_ranking[p.steam_id] for p in teams[team]] for team in teams
+            [players_current_ranking[p_index_tuple[0]] for p_index_tuple in teams[team]] for team in teams
         ]
         ts_teams = [[Rating(p.mu, p.sigma) for p in team] for team in team_states]
-        placements = [teams[team][0].placement for team in teams]
+        placements = [teams[team][0][1].placement for team in teams]
 
         ts_env = make_ts_env()
         new_ts = ts_env.rate(ts_teams, ranks=placements)
-
-        post: Dict[str, StatModel] = {}
-        for t_idx, team in enumerate(team_states):
-            for i, pre in enumerate(team):
-                r = new_ts[t_idx][i]
-                post[str(pre.id)] = StatModel(
-                    id=pre.id,
+        
+        post: List[StatModel] = list(range(len(match.players)))
+        for team_idx, team in enumerate(team_states):
+            for player_index, player in enumerate(team):
+                r = new_ts[team_idx][player_index]
+                post[player.index] = StatModel(
+                    index=player.index,
+                    id=player.id,
                     mu=float(r.mu),
                     sigma=float(r.sigma),
-                    games=pre.games + 1,
-                    wins=pre.wins + (1 if pre.mu < r.mu else 0),
-                    first=pre.first + (1 if placements[t_idx] == 0 else 0),
-                    subbedIn=pre.subbedIn,
-                    subbedOut=pre.subbedOut,
-                    civs=pre.civs,
+                    games=player.games,
+                    wins=player.wins,
+                    first=player.first,
+                    subbedIn=player.subbedIn,
+                    subbedOut=player.subbedOut,
+                    civs=player.civs,
                 )
-        for p in match.players:
-            p_current_ranking = players_current_ranking[p.steam_id]
-            p.delta = round(post[p.discord_id].mu - p_current_ranking.mu) if p.discord_id != None else 0
+        for i, p in enumerate(match.players):
+            p_current_ranking = players_current_ranking[i]
+            delta = round(post[i].mu - p_current_ranking.mu) if p.discord_id != None else 0
+            if p.is_sub:
+                # Subbed in player
+                p.delta = max(settings.min_points_for_subs, delta)
+            elif p.subbed_out:
+                # Subbed out Player
+                p.delta = delta if delta < 0 else 0
+            else:
+                # Regular player
+                p.delta = delta
+            post[i].mu = p_current_ranking.mu + p.delta
         return match, post
 
     async def create_from_save(self, file_bytes: bytes, reporter_discord_id: str, is_cloud: bool, discord_message_id: str) -> Dict[str, Any]:
@@ -259,16 +283,50 @@ class MatchService:
         if int(player_id) < 1 or int(player_id) > len(match.players):
             raise MatchServiceError("Player ID out of range. Must be between 1 and number of players")
         match.players[int(player_id)-1].discord_id = player_discord_id
+        match.players[int(player_id)-1].steam_id = await self.discord_to_steam_id(player_discord_id)
         match, _ = await self.update_player_stats(match)
         changes = {}
         changes["discord_messages_id_list"] = res['discord_messages_id_list'] + [discord_message_id]
         changes[f"players.{int(player_id)-1}.discord_id"] = player_discord_id
+        changes[f"players.{int(player_id)-1}.steam_id"] = match.players[int(player_id)-1].steam_id
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.delta"] = match.players[i].delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Assigned player id for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})
         updated["match_id"] = str(updated.pop("_id"))
+        return updated
+
+    async def assign_sub(self, match_id: str, sub_in_id: str, sub_out_discord_id: str, discord_message_id: str) -> Dict[str, Any]:
+        oid = self._to_oid(match_id)
+        res = await self.pending_matches.find_one({"_id": oid})
+        if res == None:
+            raise NotFoundError("Match not found")
+        match = MatchModel(**res)
+        if int(sub_in_id) < 0 or int(sub_in_id) >= len(match.players):
+            raise MatchServiceError("Sub in Player ID out of range. Must be between 0 and number of players - 1")
+        match.players[int(sub_in_id)].is_sub = True
+        sub_out_player_steam_id = await self.discord_to_steam_id(sub_out_discord_id)
+        match.players.insert(int(sub_in_id) + 1, PlayerModel(
+            steam_id = sub_out_player_steam_id,
+            user_name = None,
+            civ = match.players[int(sub_in_id)].civ,
+            team = match.players[int(sub_in_id)].team,
+            leader = match.players[int(sub_in_id)].leader,
+            player_alive = match.players[int(sub_in_id)].player_alive,
+            discord_id = sub_out_discord_id,
+            placement = match.players[int(sub_in_id)].placement,
+            quit = False,
+            delta = 0.0,
+            is_sub = False,
+            subbed_out = True,
+        ))
+        match, _ = await self.update_player_stats(match)
+        match.discord_messages_id_list = res['discord_messages_id_list'] + [discord_message_id]
+        await self.pending_matches.replace_one({"_id": oid}, match.dict())
+        updated = await self.pending_matches.find_one({"_id": oid})
+        updated["match_id"] = str(updated.pop("_id"))
+        logger.info(f"✅ 🔄 Match {match_id}, sub_in: {sub_in_id}, sub_out: {sub_out_discord_id}")
         return updated
 
     async def approve_match(self, match_id: str, approver_discord_id: str) -> Dict[str, Any]:
@@ -291,21 +349,22 @@ class MatchService:
                 async with session.start_transaction():
                     try:
                         for i, player in enumerate(match.players):
-                            changes = {}
-                            player_new_stats = post.get(player.discord_id)
-                            changes[f"mu"] = player_new_stats.mu
-                            changes[f"sigma"] = player_new_stats.sigma
-                            changes[f"games"] = player_new_stats.games
-                            changes[f"wins"] = player_new_stats.wins
-                            changes[f"first"] = player_new_stats.first
-                            changes[f"subbedIn"] = player_new_stats.subbedIn
-                            changes[f"subbedOut"] = player_new_stats.subbedOut
+                            player_new_stats = post[i]
+                            player_stats_db = {}
+                            player_stats_db[f"mu"] = player_new_stats.mu
+                            player_stats_db[f"sigma"] = player_new_stats.sigma
+                            player_stats_db[f"games"] = player_new_stats.games + 1
+                            player_stats_db[f"wins"] = player_new_stats.wins + (1 if player.placement == 0 else 0)
+                            player_stats_db[f"first"] = player_new_stats.first + (1 if player.delta > 0 else 0)
+                            player_stats_db[f"subbedIn"] = player_new_stats.subbedIn + (1 if player.is_sub else 0)
+                            player_stats_db[f"subbedOut"] = player_new_stats.subbedOut + (1 if player.subbed_out else 0)
+                            player_stats_db[f"lastModified"] = datetime.now(UTC)
                             if player.civ:
                                 civs = player_new_stats.civs
                                 player_civ_leader = get_cpl_name(match.game, player.civ, player.leader)
                                 civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
-                                changes[f"civs"] = civs
-                            await stats_table.update_one({"_id": player.discord_id}, {"$set": changes}, session=session)
+                                player_stats_db[f"civs"] = civs
+                            await stats_table.replace_one({"_id": Int64(player.discord_id)}, player_stats_db, session=session)
                         validated = await self.validated_matches.insert_one(match.dict(), session=session)
                         await self.pending_matches.delete_one({"_id": oid}, session=session)
                         # Commit the transaction

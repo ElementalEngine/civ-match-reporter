@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Form
 from app.dependencies import get_database
-from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, ApproveMatch
+from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, AssignSub, ApproveMatch
 from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
@@ -115,6 +115,25 @@ async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_
         return await svc.assign_discord_id(match_id, player_id, player_discord_id, discord_message_id)
     except InvalidIDError:
         logger.error(f"🔴 Invalid player ID: {match_id}, player_id: {player_id}, discord_id: {player_discord_id}")
+        raise HTTPException(status_code=400, detail="Invalid player ID")
+    except NotFoundError:
+        logger.warning(f"🔴 Match not found. matchID: {match_id}")
+        raise HTTPException(status_code=404, detail="Match not found")
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.put("/assign-sub/", response_model=MatchResponse)
+async def assign_sub(payload: AssignSub = Form(), db = Depends(get_database)):
+    svc = MatchService(db)
+    match_id = payload.match_id
+    sub_in_id = payload.sub_in_id
+    sub_out_discord_id = payload.sub_out_discord_id
+    discord_message_id = payload.discord_message_id
+    try:
+        return await svc.assign_sub(match_id, sub_in_id, sub_out_discord_id, discord_message_id)
+    except InvalidIDError:
+        logger.error(f"🔴 Invalid player ID: {match_id}, sub_in_id: {sub_in_id}, sub_out_discord_id: {sub_out_discord_id}")
         raise HTTPException(status_code=400, detail="Invalid player ID")
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")

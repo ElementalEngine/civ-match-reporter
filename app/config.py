@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     ts_sigma_free: float = Field(90.0, ge=0, env="TS_SIGMA_FREE")
     ts_teamer_boost: float = Field(1.0, env="TS_TEAMER_BOOST")
     
+    min_points_for_subs: int = Field(5, ge=0, env="MIN_POINTS_FOR_SUBS")
+    
     civ_save_parser_version: str = Field("1.0", env="CIV_SAVE_PARSER_VERSION")
 
     # pydantic v2 model config

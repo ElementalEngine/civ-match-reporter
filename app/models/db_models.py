@@ -7,6 +7,7 @@ class CivCount(BaseModel):
     count: int
 
 class StatModel(BaseModel):
+    index: int
     id: int  # discord_id
     mu: float
     sigma: float
@@ -29,7 +30,8 @@ class PlayerModel(BaseModel):
     placement: Optional[int] = None
     quit: bool = False
     delta: float = 0.0
-    sub_of: Optional[str] = None
+    is_sub: bool = False
+    subbed_out: bool = False
 
 class MatchModel(BaseModel):
     game: str  # parsers return "civ6" or "civ7"

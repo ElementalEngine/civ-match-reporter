@@ -13,7 +13,8 @@ class PlayerSchema(BaseModel):
     placement: Optional[int] = None
     quit: bool
     delta: float = 0.0
-    sub_of: Optional[str] = None
+    is_sub: bool = False
+    subbed_out: bool = False
 
 class MatchResponse(BaseModel):
     match_id: str
@@ -62,6 +63,12 @@ class AssignDiscordId(BaseModel):
     match_id: str
     player_id: str
     player_discord_id: str
+    discord_message_id: str
+
+class AssignSub(BaseModel):
+    match_id: str
+    sub_in_id: str
+    sub_out_discord_id: str
     discord_message_id: str
 
 class ApproveMatch(BaseModel):
