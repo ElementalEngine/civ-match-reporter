@@ -29,6 +29,7 @@ class MatchService:
         self.players = db["players"].players
         self.civ6stats = db["civ6stats"]
         self.civ7stats = db["civ7stats"]
+        self.subs_table = db["subs"].subs
 
     @staticmethod
     def _to_oid(match_id: str) -> ObjectId:
@@ -387,6 +388,13 @@ class MatchService:
                                 civs[player_civ_leader] = civs.get(player_civ_leader, 0) + 1
                                 player_stats_db[f"civs"] = civs
                             await stats_table.replace_one({"_id": Int64(player.discord_id)}, player_stats_db, upsert=True, session=session)
+                            if player.is_sub:
+                                await self.subs_table.update_one(
+                                    {"_id": player.discord_id},
+                                    {"$inc": {"subs_in": 1}},
+                                    upsert=True,
+                                    session=session
+                                )
                         validated = await self.validated_matches.insert_one(match.dict(), session=session)
                         await self.pending_matches.delete_one({"_id": oid}, session=session)
                         # Commit the transaction
