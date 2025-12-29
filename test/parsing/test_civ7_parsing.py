@@ -11,7 +11,6 @@ def _test_parse_civ7_save(file_path, expected_game, expected_age, expected_turn,
         buffer = f.read()
     # Parse the save file
     result = civ7.parse_civ7_save(buffer)
-    print(result)
 
     # Assert the result is a dict and contains expected keys (customize as needed)
     assert isinstance(result, dict)
@@ -34,15 +33,15 @@ def _test_parse_civ7_save(file_path, expected_game, expected_age, expected_turn,
 def test_parse_civ7_save_3v3_T10():
     expected_players = [
         { 
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_ROME',
             'leader': 'LEADER_FRIEDRICH',
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_MISSISSIPPIAN',
             'leader': 'LEADER_HIMIKO',
             'team': 0
@@ -55,22 +54,22 @@ def test_parse_civ7_save_3v3_T10():
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_EGYPT',
             'leader': 'LEADER_NAPOLEON_ALT',
             'team': 1
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_CARTHAGE',
             'leader': 'LEADER_AUGUSTUS',
             'team': 1
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_PERSIA',
             'leader': 'LEADER_GENGHIS_KHAN',
             'team': 1
@@ -144,8 +143,8 @@ def test_parse_civ7_save_duel():
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_MAURYA',
             'leader': 'LEADER_ASHOKA',
             'team': 1
@@ -164,43 +163,43 @@ def test_parse_civ7_save_duel():
 def test_parse_civ7_save_AutoSave_001():
     expected_players = [
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_ASSYRIA',
             'leader': 'LEADER_EDWARD_TEACH',
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_TONGA',
             'leader': 'LEADER_SAYYIDA_AL_HURRA',
             'team': 1
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_SILLA',
             'leader': 'LEADER_LAKSHMIBAI',
             'team': 2
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_AKSUM',
             'leader': 'LEADER_IBN_BATTUTA',
             'team': 3
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_MAURYA',
             'leader': 'LEADER_ASHOKA_ALT',
             'team': 4
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_PERSIA',
             'leader': 'LEADER_XERXES_ALT',
             'team': 5
@@ -219,43 +218,43 @@ def test_parse_civ7_save_AutoSave_001():
 def test_parse_civ7_save_AutoSave_002():
     expected_players = [
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_DAI_VIET',
             'leader': 'LEADER_GENGHIS_KHAN',
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_ICELAND',
             'leader': 'LEADER_EDWARD_TEACH',
             'team': 1
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_PIRATE_REPUBLIC',
             'leader': 'LEADER_TECUMSEH',
             'team': 2
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_SPAIN',
             'leader': 'LEADER_NAPOLEON',
             'team': 3
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_SONGHAI',
             'leader': 'LEADER_HATSHEPSUT',
             'team': 4
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_HAWAII',
             'leader': 'LEADER_JOSE_RIZAL',
             'team': 5
@@ -274,43 +273,43 @@ def test_parse_civ7_save_AutoSave_002():
 def test_parse_civ7_save_AutoSave_003():
     expected_players = [
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_QAJAR',
             'leader': 'LEADER_ADA_LOVELACE',
             'team': 0
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_OTTOMANS',
             'leader': 'LEADER_AMINA',
             'team': 1
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_MUGHAL',
             'leader': 'LEADER_XERXES',
             'team': 2
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_AMERICA',
             'leader': 'LEADER_BENJAMIN_FRANKLIN',
             'team': 3
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_GREAT_BRITAIN',
             'leader': 'LEADER_EDWARD_TEACH',
             'team': 4
         },
         {
-            'steam_id': -1,
-            'user_name': '',
+            'steam_id': None,
+            'user_name': None,
             'civ': 'CIVILIZATION_MEIJI',
             'leader': 'LEADER_HIMIKO_ALT',
             'team': 5

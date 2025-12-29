@@ -20,7 +20,7 @@ class MatchResponse(BaseModel):
     match_id: str
     game: str
     turn: int
-    age: Optional[int] = None
+    age: Optional[str] = None
     map_type: str
     game_mode: str
     is_cloud: bool

@@ -36,7 +36,7 @@ class PlayerModel(BaseModel):
 class MatchModel(BaseModel):
     game: str  # parsers return "civ6" or "civ7"
     turn: int
-    age: Optional[int] = None
+    age: Optional[str] = None
     map_type: str
     game_mode: str  # allow "", "FFA", "Teamer", "Duel"
     is_cloud: bool

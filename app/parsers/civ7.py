@@ -242,20 +242,25 @@ def determine_game_mode(players):
 
 def extract_player_info(root):
     players = []
+    teams_dict = {}
     for p in root['players']:
         civ = p['civ']['value']
         leader = p['leader']['value']
         team = int(p['team_id']['value']) if p['team_id'] != None else 0
-        steam_id = p['user_id']['value'].split('@')[-1] if p['user_id'] != None else -1
-        user_name = p['user_id']['value'].split('@')[0] if p['user_id'] != None else ''
+        # normalize team ids to 0..n-1 where n is the number of teams
+        if team not in teams_dict:
+            teams_dict[team] = len(teams_dict)
+        team = teams_dict[team]
+        steam_id = p['user_id']['value'].split('@')[-1] if p['user_id'] != None else None
+        user_name = p['user_id']['value'].split('@')[0] if p['user_id'] != None else None
         # player_alive = bool(p['PLAYER_ALIVE']['data'])
         players.append({
             "steam_id": steam_id,
             "user_name": user_name,
             "civ": civ,
             "leader": leader,
-            "team": team
-            # "player_alive": player_alive
+            "team": team,
+            "placement": team
         })
     return players
 

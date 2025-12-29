@@ -35,7 +35,7 @@ def extract_player_info(root):
             "civ": civ,
             "team": team,
             "player_alive": player_alive,
-            "placement": len(players)
+            "placement": team
         })
     return players
 

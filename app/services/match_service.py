@@ -27,7 +27,8 @@ class MatchService:
         self.pending_matches = db["civ_match_reporter"].pending_matches
         self.validated_matches = db["civ_match_reporter"].validated_matches
         self.players = db["players"].players
-        self.stats = db["stats2"]
+        self.civ6stats = db["civ6stats"]
+        self.civ7stats = db["civ7stats"]
 
     @staticmethod
     def _to_oid(match_id: str) -> ObjectId:
@@ -69,9 +70,12 @@ class MatchService:
                 player.discord_id = await self.steam_to_discord_id(player.steam_id)
         return match
 
-    def get_stat_table(self, is_cloud: bool, match_type: str):
+    def get_stat_table(self, is_cloud: bool, match_type: str, civ_version: str):
         match_table = ("PBC-" if is_cloud else "") + match_type
-        return getattr(self.stats, match_table)
+        if civ_version == "civ7":
+            return getattr(self.civ7stats, match_table)
+        else:
+            return getattr(self.civ6stats, match_table)
 
     async def get_player_ranking(self, match: MatchModel, discord_id: str, player_index: int) -> StatModel:
         if discord_id == None:
@@ -87,7 +91,7 @@ class MatchService:
                 subbedOut=0,
                 civs={},
             )
-        stat_table = self.get_stat_table(match.is_cloud, match.game_mode)
+        stat_table = self.get_stat_table(match.is_cloud, match.game_mode, match.game)
         player = await stat_table.find_one({"_id": Int64(discord_id)})
         if player:
             player['id'] = player.pop('_id')
@@ -361,7 +365,7 @@ class MatchService:
             match, post = await self.update_player_stats(match)
             match.approved_at = datetime.now(UTC)
             match.approver_discord_id = approver_discord_id
-            stats_table = self.get_stat_table(match.is_cloud, match.game_mode)
+            stats_table = self.get_stat_table(match.is_cloud, match.game_mode, match.game)
             session = await self.db.start_session()
             async with session:
                 async with session.start_transaction():
