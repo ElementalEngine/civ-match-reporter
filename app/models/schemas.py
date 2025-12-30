@@ -79,3 +79,18 @@ class RemoveSub(BaseModel):
 class ApproveMatch(BaseModel):
     match_id: str
     approver_discord_id: str
+    
+class GetLeaderboardRequest(BaseModel):
+    game: str
+    game_type: str
+    game_mode: str
+
+class PlayerLeaderboard(BaseModel):
+    discord_id: str
+    rating: int
+    games_played: int
+    wins: int
+    first: int
+    
+class LeaderboardRankingResponse(BaseModel):
+    rankings: List[PlayerLeaderboard]

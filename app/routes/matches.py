@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Form
 from app.dependencies import get_database
-from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, AssignSub, RemoveSub, ApproveMatch
+from app.models.schemas import MatchResponse, MatchUpdate, ChangeOrder, DeletePendingMatch, TriggerQuit, AppendDiscordMessageID, AssignDiscordId, AssignSub, RemoveSub, ApproveMatch, GetLeaderboardRequest, LeaderboardRankingResponse
 from app.services.match_service import MatchService, InvalidIDError, NotFoundError, MatchServiceError
 
 logger = logging.getLogger(__name__)
@@ -169,6 +169,21 @@ async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_databas
         return await svc.approve_match(match_id, approver_discord_id)
     except NotFoundError:
         logger.warning(f"🔴 Match not found. matchID: {match_id}")
+        raise HTTPException(status_code=404, detail="Match not found")
+    except MatchServiceError as e:
+        logger.warning(f"⚠️ Update error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@router.put("/get-leaderboard-ranking/", response_model=LeaderboardRankingResponse)
+async def approve_match(payload: GetLeaderboardRequest = Form(), db = Depends(get_database)):
+    svc = MatchService(db)
+    game = payload.game
+    game_type = payload.game_type
+    game_mode = payload.game_mode
+    try:
+        return await svc.get_leaderboard(game_type, game, game_mode)
+    except NotFoundError:
+        logger.warning(f"🔴 Invalid game type for leaderboard. game:{game} game_mode:{game_mode}")
         raise HTTPException(status_code=404, detail="Match not found")
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")

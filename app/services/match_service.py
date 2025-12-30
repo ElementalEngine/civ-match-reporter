@@ -406,3 +406,17 @@ class MatchService:
                         raise MatchServiceError(f"An error occured during writing to DB: {e}")
             logger.info(f"✅ 🔄 Match {match_id} approved")
             return {"match_id": str(validated.inserted_id), **match.dict()}
+        
+    async def get_leaderboard(self, is_cloud: str, game: str, game_mode: str) -> Dict[str, Any]:
+        stats_table = self.get_stat_table(is_cloud == "PBC", game_mode, game)
+        cursor = stats_table.find({ "games": { "$gt": 3 } }).sort([("mu", -1), ("sigma", 1)]).limit(100)
+        leaderboard = []
+        async for doc in cursor:
+            leaderboard.append({
+                "discord_id": str(doc["_id"]),
+                "rating": doc["mu"],
+                "games_played": doc["games"],
+                "wins": doc["wins"],
+                "first": doc["first"],
+            })
+        return {"rankings": leaderboard}
