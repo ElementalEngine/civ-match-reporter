@@ -409,7 +409,7 @@ class MatchService:
         
     async def get_leaderboard(self, is_cloud: str, game: str, game_mode: str) -> Dict[str, Any]:
         stats_table = self.get_stat_table(is_cloud == "PBC", game_mode, game)
-        cursor = stats_table.find({ "games": { "$gt": 3 } }).sort([("mu", -1), ("sigma", 1)]).limit(100)
+        cursor = stats_table.find({ "games": { "$gt": 2 } }).sort([("mu", -1), ("sigma", 1)]).limit(100)
         leaderboard = []
         async for doc in cursor:
             leaderboard.append({

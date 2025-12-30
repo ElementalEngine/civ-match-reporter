@@ -18,7 +18,7 @@ async def get_match(match_id: str = Form(), db = Depends(get_database)):
     except NotFoundError:
         logger.warning(f"🔴 Match not found: {match_id}")
         raise HTTPException(status_code=404, detail="Match not found")
-    
+
 @router.put("/append-message-id-list/", response_model=MatchResponse)
 async def append_message_id_list(payload: AppendDiscordMessageID = Form(), db = Depends(get_database)):
     match_id = payload.match_id
@@ -122,7 +122,7 @@ async def assign_discord_id(payload: AssignDiscordId = Form(), db = Depends(get_
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/assign-sub/", response_model=MatchResponse)
 async def assign_sub(payload: AssignSub = Form(), db = Depends(get_database)):
     svc = MatchService(db)
@@ -141,7 +141,7 @@ async def assign_sub(payload: AssignSub = Form(), db = Depends(get_database)):
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/remove-sub/", response_model=MatchResponse)
 async def remove_sub(payload: RemoveSub = Form(), db = Depends(get_database)):
     svc = MatchService(db)
@@ -173,7 +173,7 @@ async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_databas
     except MatchServiceError as e:
         logger.warning(f"⚠️ Update error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
-    
+
 @router.put("/get-leaderboard-ranking/", response_model=LeaderboardRankingResponse)
 async def approve_match(payload: GetLeaderboardRequest = Form(), db = Depends(get_database)):
     svc = MatchService(db)
