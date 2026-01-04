@@ -175,13 +175,14 @@ async def approve_match(payload: ApproveMatch = Form(), db = Depends(get_databas
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.put("/get-leaderboard-ranking/", response_model=LeaderboardRankingResponse)
-async def approve_match(payload: GetLeaderboardRequest = Form(), db = Depends(get_database)):
+async def get_leaderboard_ranking(payload: GetLeaderboardRequest = Form(), db = Depends(get_database)):
     svc = MatchService(db)
     game = payload.game
     game_type = payload.game_type
     game_mode = payload.game_mode
+    is_seasonal = payload.is_seasonal
     try:
-        return await svc.get_leaderboard(game_type, game, game_mode)
+        return await svc.get_leaderboard(game_type, game, game_mode, is_seasonal)
     except NotFoundError:
         logger.warning(f"🔴 Invalid game type for leaderboard. game:{game} game_mode:{game_mode}")
         raise HTTPException(status_code=404, detail="Match not found")

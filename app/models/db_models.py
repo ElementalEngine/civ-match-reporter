@@ -30,6 +30,7 @@ class PlayerModel(BaseModel):
     placement: Optional[int] = None
     quit: bool = False
     delta: float = 0.0
+    season_delta: Optional[float] = None
     is_sub: bool = False
     subbed_out: bool = False
 

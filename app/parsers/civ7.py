@@ -235,10 +235,10 @@ def determine_game_mode(players):
     if -1 in unique_teams:
         return ""
     if len(players) == 2:
-        return "Duel"
+        return "duel"
     if len(unique_teams) == len(players):
-        return "FFA"
-    return "Teamer"
+        return "ffa"
+    return "teamer"
 
 def extract_player_info(root):
     players = []

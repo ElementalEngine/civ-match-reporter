@@ -80,7 +80,7 @@ def test_parse_civ7_save_3v3_T10():
         expected_game='civ7',
         expected_age='AGE_ANTIQUITY',
         expected_turn=10,
-        expected_mode='Teamer',
+        expected_mode='teamer',
         expected_map_type='Continents Plus',
         expected_players=expected_players
     )
@@ -128,7 +128,7 @@ def test_parse_civ7_save_5player_ffa():
         expected_game='civ7',
         expected_age='AGE_ANTIQUITY',
         expected_turn=18,
-        expected_mode='FFA',
+        expected_mode='ffa',
         expected_map_type='Continents',
         expected_players=expected_players
     )
@@ -155,7 +155,7 @@ def test_parse_civ7_save_duel():
         expected_game='civ7',
         expected_age='AGE_ANTIQUITY',
         expected_turn=1,
-        expected_mode='Duel',
+        expected_mode='duel',
         expected_map_type='Archipelago',
         expected_players=expected_players
     )
@@ -210,7 +210,7 @@ def test_parse_civ7_save_AutoSave_001():
         expected_game='civ7',
         expected_age='AGE_ANTIQUITY',
         expected_turn=1,
-        expected_mode='FFA',
+        expected_mode='ffa',
         expected_map_type='Continents and Islands',
         expected_players=expected_players
     )
@@ -265,7 +265,7 @@ def test_parse_civ7_save_AutoSave_002():
         expected_game='civ7',
         expected_age='AGE_EXPLORATION',
         expected_turn=2,
-        expected_mode='FFA',
+        expected_mode='ffa',
         expected_map_type='Continents and Islands',
         expected_players=expected_players
     )
@@ -320,7 +320,7 @@ def test_parse_civ7_save_AutoSave_003():
         expected_game='civ7',
         expected_age='AGE_MODERN',
         expected_turn=3,
-        expected_mode='FFA',
+        expected_mode='ffa',
         expected_map_type='Continents and Islands',
         expected_players=expected_players
     )
