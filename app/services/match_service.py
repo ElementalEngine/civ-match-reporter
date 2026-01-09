@@ -92,8 +92,8 @@ class MatchService:
         player_stats_db[f"mu"] = player_new_stats.mu
         player_stats_db[f"sigma"] = player_new_stats.sigma
         player_stats_db[f"games"] = player_new_stats.games + 1
-        player_stats_db[f"wins"] = player_new_stats.wins + (1 if player.placement == 0 else 0)
-        player_stats_db[f"first"] = player_new_stats.first + (1 if getattr(player, delta_value_name) > 0 else 0)
+        player_stats_db[f"wins"] = player_new_stats.wins + (1 if getattr(player, delta_value_name) > 0 else 0)
+        player_stats_db[f"first"] = player_new_stats.first + (1 if player.placement == 0 else 0)
         player_stats_db[f"subbedIn"] = player_new_stats.subbedIn + (1 if player.is_sub else 0)
         player_stats_db[f"subbedOut"] = player_new_stats.subbedOut + (1 if player.subbed_out else 0)
         player_stats_db[f"lastModified"] = datetime.now(UTC)

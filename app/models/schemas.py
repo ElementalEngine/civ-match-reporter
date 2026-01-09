@@ -93,6 +93,6 @@ class PlayerLeaderboard(BaseModel):
     games_played: int
     wins: int
     first: int
-    
+
 class LeaderboardRankingResponse(BaseModel):
     rankings: List[PlayerLeaderboard]
