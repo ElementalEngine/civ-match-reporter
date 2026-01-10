@@ -12,6 +12,7 @@ from app.services.skill import make_ts_env
 import hashlib
 import asyncio
 from datetime import datetime, UTC
+import copy
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +149,8 @@ class MatchService:
     def update_player_stats(self, match: MatchModel, players_ranking: List[StatModel], delta_value_name: str) -> MatchModel:
         teams = defaultdict(list)
         for i, p in enumerate(match.players):
+            if p.is_sub:
+                continue
             teams[p.team].append((i, p))
         team_states: List[List[StatModel]] = [
             [players_ranking[p_index_tuple[0]] for p_index_tuple in teams[team]] for team in teams
@@ -176,6 +179,8 @@ class MatchService:
                 )
         for i, p in enumerate(match.players):
             p_current_ranking = players_ranking[i]
+            if p.is_sub:
+                post[i] = copy.copy(post[i+1])
             delta = round(post[i].mu - p_current_ranking.mu) if p.discord_id != None else 0
             if p.is_sub:
                 # Subbed in player
@@ -270,15 +275,14 @@ class MatchService:
             player.placement = int(new_order_list[player.team]) - 1
         players_ranking = await self.get_players_ranking(match, is_seasonal=False)
         players_season_ranking = await self.get_players_ranking(match, is_seasonal=True)
-        print(f'players_ranking = {players_ranking}')
-        print(f'players_season_ranking = {players_season_ranking}')
         match, _ = self.update_player_stats(match, players_ranking, "delta")
         match, _ = self.update_player_stats(match, players_season_ranking, "season_delta")
         changes = {}
         changes["discord_messages_id_list"] = res['discord_messages_id_list'] + [discord_message_id]
         for i, player in enumerate(match.players):
             changes[f"players.{i}.placement"] = player.placement
-            changes[f"players.{i}.delta"] = player.delta
+            changes[f"players.{i}.delta"] = match.players[i].delta
+            changes[f"players.{i}.season_delta"] = match.players[i].season_delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Changed player order for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})
@@ -332,6 +336,7 @@ class MatchService:
         changes[f"players.{int(player_id)-1}.steam_id"] = match.players[int(player_id)-1].steam_id
         for i, player in enumerate(res['players']):
             changes[f"players.{i}.delta"] = match.players[i].delta
+            changes[f"players.{i}.season_delta"] = match.players[i].season_delta
         await self.pending_matches.update_one({"_id": oid}, {"$set": changes})
         logger.info(f"✅ 🔄 Assigned player id for match {match_id}")
         updated = await self.pending_matches.find_one({"_id": oid})
