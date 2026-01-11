@@ -28,7 +28,7 @@ class MatchService:
         self.pending_matches = db["match_reporter"].pending_matches
         self.validated_matches = db["match_reporter"].validated_matches
         self.players = db["server_members"].users
-        self.subs_table = db["civ_match_reporter"].subs
+        self.subs_table = db["server_members"].subs
         self.civ6_lifetime_stats = db["civ6_lifetime_stats"]
         self.civ7_lifetime_stats = db["civ7_lifetime_stats"]
         self.civ6_seasonal_stats = db["civ6_season_stats"]
