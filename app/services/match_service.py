@@ -146,25 +146,46 @@ class MatchService:
             players_ranking.append(ranking)
         return players_ranking
 
-    def update_player_stats(self, match: MatchModel, players_ranking: List[StatModel], delta_value_name: str) -> MatchModel:
-        teams = defaultdict(list)
+    def update_player_stats(self, match: MatchModel, players_ranking: List[StatModel], delta_value_name: str):
+        num_teams = len(set([p.team for p in match.players]))
+        if num_teams <= 1:
+            print(f"Skipping match with less than 2 teams. Validation Msg ID: {match.validation_msg_id}")
+            return None, None
+        teams_wo_subs = defaultdict(list)
+        teams_with_sub_ins = defaultdict(list)
         for i, p in enumerate(match.players):
             if p.is_sub:
-                continue
-            teams[p.team].append((i, p))
-        team_states: List[List[StatModel]] = [
-            [players_ranking[p_index_tuple[0]] for p_index_tuple in teams[team]] for team in teams
+                teams_with_sub_ins[p.team].append((i, p))
+            elif p.subbed_out:
+                teams_wo_subs[p.team].append((i, p))
+            else:
+                teams_wo_subs[p.team].append((i, p))
+                teams_with_sub_ins[p.team].append((i, p))
+        team_wo_subs_states: List[List[StatModel]] = [
+            [players_ranking[p_index_tuple[0]] for p_index_tuple in teams_wo_subs[team]] for team in teams_wo_subs
         ]
-        ts_teams = [[Rating(p.mu, p.sigma) for p in team] for team in team_states]
-        placements = [teams[team][0][1].placement for team in teams]
+        team_with_sub_ins_states: List[List[StatModel]] = [
+            [players_ranking[p_index_tuple[0]] for p_index_tuple in teams_with_sub_ins[team]] for team in teams_with_sub_ins
+        ]
 
-        ts_env = make_ts_env()
-        new_ts = ts_env.rate(ts_teams, ranks=placements)
+        ts_teams_wo_subs = [[Rating(p.mu, p.sigma) for p in team] for team in team_wo_subs_states]
+        ts_teams_with_sub_ins = [[Rating(p.mu, p.sigma) for p in team] for team in team_with_sub_ins_states]
         
+        placements_wo_subs = [teams_wo_subs[team][0][1].placement for team in teams_wo_subs]
+        placements_with_sub_ins = [teams_with_sub_ins[team][0][1].placement for team in teams_with_sub_ins]
+
+        ts_wo_subs_env = make_ts_env()
+        ts_with_sub_ins_env = make_ts_env()
+        
+        new_ts_wo_subs = ts_wo_subs_env.rate(ts_teams_wo_subs, ranks=placements_wo_subs)
+        new_ts_with_sub_ins = ts_with_sub_ins_env.rate(ts_teams_with_sub_ins, ranks=placements_with_sub_ins)
+
         post: List[StatModel] = list(range(len(match.players)))
-        for team_idx, team in enumerate(team_states):
+        for team_idx, team in enumerate(team_wo_subs_states):
             for player_index, player in enumerate(team):
-                r = new_ts[team_idx][player_index]
+                if match.players[player.index].is_sub:
+                    raise ValueError("This should not happen: player is a sub but being processed in wo_subs team.")
+                r = new_ts_wo_subs[team_idx][player_index]
                 post[player.index] = StatModel(
                     index=player.index,
                     id=player.id,
@@ -177,10 +198,24 @@ class MatchService:
                     subbedOut=player.subbedOut,
                     civs=player.civs,
                 )
+        for team_idx, team in enumerate(team_with_sub_ins_states):
+            for player_index, player in enumerate(team):
+                if match.players[player.index].is_sub:
+                    r = new_ts_with_sub_ins[team_idx][player_index]
+                    post[player.index] = StatModel(
+                        index=player.index,
+                        id=player.id,
+                        mu=float(r.mu),
+                        sigma=float(r.sigma),
+                        games=player.games,
+                        wins=player.wins,
+                        first=player.first,
+                        subbedIn=player.subbedIn,
+                        subbedOut=player.subbedOut,
+                        civs=player.civs,
+                    )
         for i, p in enumerate(match.players):
             p_current_ranking = players_ranking[i]
-            if p.is_sub:
-                post[i] = copy.copy(post[i+1])
             delta = round(post[i].mu - p_current_ranking.mu) if p.discord_id != None else 0
             if p.is_sub:
                 # Subbed in player
