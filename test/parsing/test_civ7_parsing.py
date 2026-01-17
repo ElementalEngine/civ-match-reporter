@@ -324,3 +324,72 @@ def test_parse_civ7_save_AutoSave_003():
         expected_map_type='Continents and Islands',
         expected_players=expected_players
     )
+
+def test_parse_civ7_save_modernGame():
+    expected_players = [
+        {
+            'steam_id': '76561198021954438',
+            'user_name': '-KC- CanuckSoldier[CPL]',
+            'civ': 'CIVILIZATION_MEXICO',
+            'leader': 'LEADER_HATSHEPSUT',
+            'team': 0
+        },
+        {
+            'steam_id': '76561199700824480',
+            'user_name': 'S2ci Irrel War Master',
+            'civ': 'CIVILIZATION_QAJAR',
+            'leader': 'LEADER_TRUNG_TRAC',
+            'team': 1
+        },
+        {
+            'steam_id': '76561198052505244',
+            'user_name': 'Eudaimania',
+            'civ': 'CIVILIZATION_OTTOMANS',
+            'leader': 'LEADER_MACHIAVELLI',
+            'team': 2
+        },
+        {
+            'steam_id': '76561198305084185',
+            'user_name': 'AntartiK',
+            'civ': 'CIVILIZATION_PRUSSIA',
+            'leader': 'LEADER_LAKSHMIBAI',
+            'team': 3
+        },
+        {
+            'steam_id': '76561198858700477',
+            'user_name': 'IcerMakerBuilder',
+            'civ': 'CIVILIZATION_MEIJI',
+            'leader': 'LEADER_XERXES',
+            'team': 4
+        },
+        {
+            'steam_id': '2390158107305499949',
+            'user_name': 'Patriotlovinbrit',
+            'civ': 'CIVILIZATION_MUGHAL',
+            'leader': 'LEADER_SAYYIDA_AL_HURRA',
+            'team': 5
+        },
+        {
+            'steam_id': '76561198074051945',
+            'user_name': 'Moonie',
+            'civ': 'CIVILIZATION_RUSSIA',
+            'leader': 'LEADER_CATHERINE',
+            'team': 6
+        },
+        {
+            'steam_id': '76561197977010133',
+            'user_name': 'BC | Kryptonic',
+            'civ': 'CIVILIZATION_NEPAL',
+            'leader': 'LEADER_XERXES_ALT',
+            'team': 7
+        }
+    ]
+    _test_parse_civ7_save(
+        file_path='../data/civ7TestSaves/modernGame.Civ7Save',
+        expected_game='civ7',
+        expected_age='AGE_MODERN',
+        expected_turn=20,
+        expected_mode='ffa',
+        expected_map_type='Pangaea and Islands',
+        expected_players=expected_players
+    )

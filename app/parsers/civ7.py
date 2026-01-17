@@ -33,6 +33,7 @@ class ChunkType:
     ChunkArray = 29
     NestedArray = 30
     Unknown_32 = 32
+    Unknown_long = 103842983
 
 def parse(data: bytes) -> Dict[str, Any]:
     chunks = parse_raw(data)
@@ -226,7 +227,12 @@ def parse_chunk(data: bytes, offset: int) -> Dict[str, Any]:
             "type": type_,
             "value": data[data_start_offset + 8:end_offset]
         }
+    elif type_ == ChunkType.Unknown_long:
+        res = parse_chunk(data, offset + 4)
+        res["offset"] = offset
+        return res
     else:
+        print(f"Unknown chunk type {type_} at offset {offset}!", file=sys.stderr)
         raise Exception(f"Could not parse chunk at offset {offset}!")
 
 def determine_game_mode(players):
