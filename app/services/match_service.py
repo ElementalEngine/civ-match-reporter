@@ -302,10 +302,6 @@ class MatchService:
         new_order_list = new_order.split(' ')
         if len(new_order_list) != num_teams:
             raise MatchServiceError(f"New order length does not match number of players/teams ({num_teams})")
-        new_order_set = set(new_order_list)
-        for i in range(1, num_teams + 1):
-            if str(i) not in new_order_set:
-                raise MatchServiceError(f"New order must contain all player/team numbers from 1 to {num_teams}")
         for i, player in enumerate(match.players):
             player.placement = int(new_order_list[player.team]) - 1
         players_ranking = await self.get_players_ranking(match, is_seasonal=False)
