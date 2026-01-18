@@ -274,7 +274,15 @@ def extract_turn(root):
     return int(root['turn']['value'])
 
 def extract_game_age(root):
-    return root['age']['value']
+    age = root['age']['value']
+    if age == 'AGE_ANTIQUITY':
+        return 'Antiquity'
+    elif age == 'AGE_EXPLORATION':
+        return 'Exploration'
+    elif age == 'AGE_MODERN':
+        return 'Modern'
+    else:
+        return age
 
 def extract_map_type(root):
     map_type_with_loc = root['map']['value']
